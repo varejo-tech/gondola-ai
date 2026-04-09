@@ -8,6 +8,8 @@ dependencias: nenhuma
 
 Este processo utiliza `config.json` para declarar as fontes de dados consumidas pelas skills. Cada usuário deve configurar seu próprio `config.json` com as credenciais e endpoints corretos. O arquivo não é versionado.
 
+Cada dataset suporta múltiplos tipos de fonte: `arquivo` (Excel, CSV), `api` (endpoint + credenciais) ou `banco` (host + porta + credenciais). O tipo é escolha do usuário na configuração — as skills referenciam apenas o nome do dataset, não o tipo.
+
 ### Datasets utilizados
 
 | Dataset | Consumido por | Descrição |
