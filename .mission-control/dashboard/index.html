@@ -3,72 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mission Control — Avanço Informática</title>
+  <title>gondola-ai — Avanço Informática</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --bg-deep: #080a0f;
-      --bg-base: #0f1117;
-      --bg-card: #1a1d27;
-      --bg-card-hover: #1f2333;
-      --bg-elevated: #252938;
-      --border: #2a2e3d;
-      --border-subtle: #1e2130;
-      --text-primary: #e2e8f0;
-      --text-secondary: #8b92a8;
-      --text-muted: #555b72;
+      --navy-deep: #0b1222;
+      --navy-base: #0f1a2e;
+      --navy-light: #162035;
+      --navy-lighter: #1c2a45;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --lime: #b8d935;
+      --lime-dark: #9bbf1e;
+      --lime-soft: rgba(184, 217, 53, 0.15);
       --green: #22c55e;
-      --green-dim: #166534;
-      --green-glow: rgba(34, 197, 94, 0.15);
+      --green-soft: rgba(34, 197, 94, 0.12);
       --yellow: #eab308;
-      --yellow-dim: #854d0e;
-      --yellow-glow: rgba(234, 179, 8, 0.15);
+      --yellow-soft: rgba(234, 179, 8, 0.12);
       --red: #ef4444;
-      --red-dim: #991b1b;
-      --red-glow: rgba(239, 68, 68, 0.15);
-      --blue: #3b82f6;
-      --blue-dim: #1e3a5f;
-      --accent: #6366f1;
+      --red-soft: rgba(239, 68, 68, 0.1);
+      --text-white: #f1f5f9;
+      --text-white-dim: #94a3b8;
+      --text-dark: #1e293b;
+      --text-dark-secondary: #64748b;
+      --text-dark-muted: #94a3b8;
       --font-mono: 'JetBrains Mono', monospace;
-      --font-sans: 'Outfit', sans-serif;
+      --font-sans: 'DM Sans', sans-serif;
+      --radius: 10px;
+      --radius-sm: 6px;
     }
 
     body {
       font-family: var(--font-sans);
-      background: var(--bg-deep);
-      color: var(--text-primary);
+      background: #e8ecf2;
+      color: var(--text-dark);
       height: 100vh;
       overflow: hidden;
-    }
-
-    /* Scan-line overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.03) 2px,
-        rgba(0, 0, 0, 0.03) 4px
-      );
-      z-index: 9999;
-    }
-
-    /* Noise texture */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.02;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      z-index: 9998;
     }
 
     #root { height: 100vh; display: flex; flex-direction: column; }
@@ -78,77 +53,49 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 24px;
-      height: 52px;
-      background: var(--bg-base);
-      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 56px;
+      background: var(--navy-base);
       flex-shrink: 0;
-      position: relative;
-    }
-
-    .topbar::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.3;
     }
 
     .topbar-logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
 
     .topbar-logo .beacon {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green), 0 0 20px rgba(34, 197, 94, 0.3);
-      animation: pulse-green 2s ease-in-out infinite;
+      background: var(--lime);
+      box-shadow: 0 0 8px rgba(184, 217, 53, 0.5);
+      animation: pulse-beacon 2.5s ease-in-out infinite;
     }
 
     .topbar-logo .beacon.offline {
-      background: var(--text-muted);
+      background: var(--text-white-dim);
       box-shadow: none;
       animation: none;
     }
 
-    @keyframes pulse-green {
+    @keyframes pulse-beacon {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    @keyframes pulse-yellow {
-      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--yellow); }
-      50% { opacity: 0.6; box-shadow: 0 0 16px var(--yellow); }
-    }
-
-    @keyframes pulse-red {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
+      50% { opacity: 0.4; }
     }
 
     .topbar-logo h1 {
       font-family: var(--font-mono);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-
-    .topbar-logo h1 span {
-      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-white);
     }
 
     .topbar-stats {
       display: flex;
-      gap: 32px;
+      gap: 36px;
     }
 
     .stat {
@@ -158,20 +105,19 @@
     }
 
     .stat-label {
-      font-family: var(--font-mono);
-      font-size: 9px;
+      font-family: var(--font-sans);
+      font-size: 10px;
       font-weight: 500;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-white-dim);
     }
 
     .stat-value {
       font-family: var(--font-mono);
       font-size: 14px;
-      font-weight: 400;
-      color: var(--text-primary);
-      letter-spacing: 0.5px;
+      font-weight: 600;
+      color: var(--text-white);
     }
 
     /* ─── Layout ─── */
@@ -183,47 +129,44 @@
 
     /* ─── Sidebar ─── */
     .sidebar {
-      width: 280px;
-      background: var(--bg-base);
-      border-right: 1px solid var(--border);
+      width: 272px;
+      background: var(--navy-base);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
     }
 
     .sidebar-header {
-      padding: 16px 20px 12px;
-      font-family: var(--font-mono);
-      font-size: 9px;
+      padding: 20px 20px 14px;
+      font-family: var(--font-sans);
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-white-dim);
     }
 
     .sidebar-list {
       flex: 1;
       overflow-y: auto;
-      padding: 8px;
+      padding: 0 10px 10px;
     }
 
     .process-item {
       padding: 12px 14px;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: background 0.15s;
       margin-bottom: 2px;
-      border: 1px solid transparent;
     }
 
     .process-item:hover {
-      background: var(--bg-card);
+      background: var(--navy-light);
     }
 
     .process-item.selected {
-      background: var(--bg-card);
-      border-color: var(--border);
+      background: var(--navy-lighter);
     }
 
     .process-item-header {
@@ -237,19 +180,19 @@
       font-family: var(--font-mono);
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-primary);
+      color: var(--text-white);
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-family: var(--font-mono);
-      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-sans);
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.3px;
       text-transform: uppercase;
     }
 
@@ -259,27 +202,34 @@
       border-radius: 50%;
     }
 
-    .badge-active { background: var(--green-glow); color: var(--green); }
-    .badge-active .badge-dot { background: var(--green); animation: pulse-green 2s ease-in-out infinite; }
+    .badge-active { background: var(--lime-soft); color: var(--lime); }
+    .badge-active .badge-dot { background: var(--lime); animation: pulse-beacon 2s ease-in-out infinite; }
 
-    .badge-completed { background: rgba(34, 197, 94, 0.08); color: var(--green-dim); }
-    .badge-completed .badge-dot { background: var(--green-dim); }
+    .badge-completed { background: var(--green-soft); color: var(--green); }
+    .badge-completed .badge-dot { background: var(--green); }
 
-    .badge-error { background: var(--red-glow); color: var(--red); }
-    .badge-error .badge-dot { background: var(--red); animation: pulse-red 1.5s ease-in-out infinite; }
+    .badge-error { background: var(--red-soft); color: var(--red); }
+    .badge-error .badge-dot { background: var(--red); animation: pulse-beacon 1.5s ease-in-out infinite; }
 
-    .badge-waiting { background: var(--yellow-glow); color: var(--yellow); }
-    .badge-waiting .badge-dot { background: var(--yellow); animation: pulse-yellow 1.8s ease-in-out infinite; }
+    .badge-waiting { background: var(--yellow-soft); color: var(--yellow); }
+    .badge-waiting .badge-dot { background: var(--yellow); animation: pulse-beacon 1.8s ease-in-out infinite; }
 
-    .badge-idle { background: rgba(85, 91, 114, 0.15); color: var(--text-muted); }
-    .badge-idle .badge-dot { background: var(--text-muted); }
+    .badge-idle { background: rgba(148, 163, 184, 0.1); color: var(--text-white-dim); }
+    .badge-idle .badge-dot { background: var(--text-white-dim); }
+
+    /* Badges on white cards */
+    .card-badge .badge-active { background: var(--lime-soft); color: #6d8a0a; }
+    .card-badge .badge-completed { background: var(--green-soft); color: #16a34a; }
+    .card-badge .badge-error { background: var(--red-soft); color: var(--red); }
+    .card-badge .badge-waiting { background: var(--yellow-soft); color: #a16207; }
+    .card-badge .badge-idle { background: #f1f5f9; color: var(--text-dark-muted); }
 
     .process-meta {
       display: flex;
       gap: 14px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-white-dim);
     }
 
     /* ─── Main Content ─── */
@@ -288,110 +238,112 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: var(--bg-deep);
+      background: #e8ecf2;
     }
 
     /* ─── Agent Panel ─── */
     .agent-panel {
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 24px 28px 0;
       flex-shrink: 0;
     }
 
     .panel-header {
-      font-family: var(--font-mono);
-      font-size: 9px;
+      font-family: var(--font-sans);
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: var(--text-dark-muted);
       margin-bottom: 14px;
     }
 
     .agent-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
     }
 
     .agent-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px 18px;
-      transition: border-color 0.2s, background 0.2s;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
 
     .agent-card:hover {
-      background: var(--bg-card-hover);
+      box-shadow: var(--card-shadow-hover);
     }
 
     .agent-card.status-error {
-      border-color: var(--red-dim);
-      box-shadow: inset 0 0 20px var(--red-glow);
+      border-left: 3px solid var(--red);
     }
 
     .agent-card.status-waiting {
-      border-color: var(--yellow-dim);
+      border-left: 3px solid var(--yellow);
+    }
+
+    .agent-card.status-running,
+    .agent-card.status-started {
+      border-left: 3px solid var(--lime);
     }
 
     .agent-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .agent-name {
       font-family: var(--font-mono);
       font-size: 13px;
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text-dark);
     }
 
     .agent-message {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-      line-height: 1.4;
-      min-height: 16px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      color: var(--text-dark-secondary);
+      margin-bottom: 14px;
+      line-height: 1.5;
+      min-height: 18px;
     }
 
     .progress-bar-container {
-      background: var(--bg-deep);
-      border-radius: 3px;
+      background: #f1f5f9;
+      border-radius: 4px;
       height: 6px;
       overflow: hidden;
-      position: relative;
     }
 
     .progress-bar-fill {
       height: 100%;
-      border-radius: 3px;
+      border-radius: 4px;
       transition: width 0.5s ease;
-      position: relative;
     }
 
     .progress-bar-fill.green {
-      background: linear-gradient(90deg, var(--green-dim), var(--green));
-      box-shadow: 0 0 8px var(--green-glow);
+      background: linear-gradient(90deg, #9bbf1e, var(--lime));
     }
 
     .progress-bar-fill.yellow {
-      background: linear-gradient(90deg, var(--yellow-dim), var(--yellow));
+      background: linear-gradient(90deg, #ca8a04, var(--yellow));
     }
 
     .progress-bar-fill.red {
-      background: linear-gradient(90deg, var(--red-dim), var(--red));
+      background: linear-gradient(90deg, #dc2626, var(--red));
     }
 
     .progress-label {
       display: flex;
       justify-content: space-between;
-      margin-top: 6px;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-muted);
+      margin-top: 8px;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-dark-muted);
     }
 
     /* ─── Task Table ─── */
@@ -400,26 +352,22 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding: 0 24px 20px;
-    }
-
-    .task-panel .panel-header {
-      padding-top: 20px;
+      padding: 20px 28px 24px;
     }
 
     .task-table-wrapper {
       flex: 1;
       overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      background: var(--card-bg);
+      box-shadow: var(--card-shadow);
     }
 
     .task-table {
       width: 100%;
       border-collapse: collapse;
-      font-family: var(--font-mono);
-      font-size: 12px;
+      font-size: 13px;
     }
 
     .task-table thead {
@@ -429,22 +377,24 @@
     }
 
     .task-table th {
-      background: var(--bg-elevated);
-      padding: 10px 14px;
+      background: #f8fafc;
+      padding: 12px 16px;
       text-align: left;
-      font-size: 9px;
+      font-family: var(--font-sans);
+      font-size: 10px;
       font-weight: 600;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
+      color: var(--text-dark-muted);
+      border-bottom: 1px solid var(--card-border);
     }
 
     .task-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      vertical-align: middle;
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text-dark-secondary);
+      font-family: var(--font-sans);
+      font-size: 13px;
     }
 
     .task-table tr:last-child td {
@@ -452,7 +402,14 @@
     }
 
     .task-table tr:hover td {
-      background: rgba(255, 255, 255, 0.015);
+      background: #f8fafc;
+    }
+
+    .task-agent-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-dark);
     }
 
     .task-progress-cell {
@@ -460,32 +417,29 @@
     }
 
     .task-progress-bar {
-      background: var(--bg-deep);
-      border-radius: 2px;
+      background: #f1f5f9;
+      border-radius: 3px;
       height: 4px;
       overflow: hidden;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .task-progress-bar-fill {
       height: 100%;
-      border-radius: 2px;
+      border-radius: 3px;
       transition: width 0.4s ease;
     }
 
     .task-progress-label {
-      font-size: 9px;
-      color: var(--text-muted);
+      font-size: 10px;
+      color: var(--text-dark-muted);
     }
 
-    .status-text {
-      font-weight: 500;
-    }
-
-    .status-text.started, .status-text.running { color: var(--green); }
-    .status-text.completed { color: var(--green-dim); }
+    .status-text { font-weight: 600; font-size: 12px; }
+    .status-text.started, .status-text.running { color: #6d8a0a; }
+    .status-text.completed { color: #16a34a; }
     .status-text.error { color: var(--red); }
-    .status-text.waiting { color: var(--yellow); }
+    .status-text.waiting { color: #a16207; }
 
     /* ─── Empty state ─── */
     .empty-state {
@@ -494,42 +448,51 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      gap: 12px;
-      color: var(--text-muted);
+      gap: 8px;
+      color: var(--text-dark-muted);
     }
 
     .empty-state-icon {
-      font-size: 32px;
-      opacity: 0.3;
+      font-size: 28px;
+      opacity: 0.25;
     }
 
     .empty-state-text {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 0.5px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .empty-state-hint {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-muted);
-      opacity: 0.6;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-dark-muted);
+      opacity: 0.7;
+    }
+
+    /* Sidebar empty state */
+    .sidebar .empty-state-text,
+    .sidebar .empty-state-hint {
+      color: var(--text-white-dim);
     }
 
     /* ─── Scrollbar ─── */
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dark-muted); }
+
+    .sidebar ::-webkit-scrollbar-thumb { background: var(--navy-lighter); }
+    .sidebar ::-webkit-scrollbar-thumb:hover { background: var(--text-white-dim); }
 
     /* ─── Animations ─── */
     @keyframes fade-in {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     .animate-in {
-      animation: fade-in 0.3s ease forwards;
+      animation: fade-in 0.25s ease forwards;
     }
   </style>
 </head>
@@ -590,8 +553,8 @@
       return `${String(mins).padStart(2,'0')}:${String(secs%60).padStart(2,'0')}`;
     }
 
-    // ─── Badge Component ───
-    function Badge({ status }) {
+    // ─── Badge ───
+    function Badge({ status, onCard }) {
       const cls = getBadgeClass(status);
       return (
         <span className={`badge ${cls}`}>
@@ -621,11 +584,11 @@
         <div className="topbar">
           <div className="topbar-logo">
             <div className={`beacon ${connected ? '' : 'offline'}`}></div>
-            <h1><span>Mission</span> Control</h1>
+            <h1>gondola-ai</h1>
           </div>
           <div className="topbar-stats">
             <div className="stat">
-              <span className="stat-label">Session</span>
+              <span className="stat-label">Sessão</span>
               <span className="stat-value">{state.session_id ? state.session_id.substring(0, 12) : '—'}</span>
             </div>
             <div className="stat">
@@ -693,9 +656,9 @@
 
       return (
         <div className={`agent-card status-${agent.status} animate-in`}>
-          <div className="agent-card-header">
+          <div className="agent-card-header card-badge">
             <span className="agent-name">{name}</span>
-            <Badge status={agent.status} />
+            <Badge status={agent.status} onCard />
           </div>
           <div className="agent-message">{message || '—'}</div>
           <div className="progress-bar-container">
@@ -760,7 +723,7 @@
           <div className="task-table-wrapper">
             {rows.length === 0 ? (
               <div className="empty-state" style={{height: '200px'}}>
-                <div className="empty-state-icon">◇</div>
+                <div className="empty-state-icon">&#9671;</div>
                 <div className="empty-state-text">Nenhuma tarefa registrada</div>
                 <div className="empty-state-hint">As tarefas aparecerão aqui conforme os agentes reportarem progresso</div>
               </div>
@@ -782,7 +745,7 @@
                     const color = getProgressColor(row.status);
                     return (
                       <tr key={`${row.agentName}-${row.taskName}`} className="animate-in" style={{animationDelay: `${i * 30}ms`}}>
-                        <td style={{color: 'var(--text-primary)'}}>{row.agentName}</td>
+                        <td><span className="task-agent-name">{row.agentName}</span></td>
                         <td>{row.taskName}</td>
                         <td><span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span></td>
                         <td>{row.message || '—'}</td>
@@ -792,7 +755,7 @@
                           </div>
                           <span className="task-progress-label">{row.step}/{row.total_steps} ({pct}%)</span>
                         </td>
-                        <td style={{fontSize: '10px', color: 'var(--text-muted)'}}>
+                        <td style={{fontSize: '11px', color: 'var(--text-dark-muted)'}}>
                           {row.timestamp ? new Date(row.timestamp).toLocaleTimeString('pt-BR') : '—'}
                         </td>
                       </tr>
@@ -814,7 +777,6 @@
       const [sessionStart] = useState(Date.now());
       const wsRef = useRef(null);
 
-      // Apply incremental event to state
       const applyEvent = useCallback((evt) => {
         setState(prev => {
           const next = { ...prev, event_count: (prev.event_count || 0) + 1 };
@@ -860,20 +822,17 @@
         });
       }, []);
 
-      // Fetch initial state
       useEffect(() => {
         fetch('/state')
           .then(r => r.json())
           .then(data => {
             setState(data);
-            // Auto-select first process
             const procs = Object.keys(data.processes || {});
             if (procs.length > 0 && !selected) setSelected(procs[0]);
           })
           .catch(() => {});
       }, []);
 
-      // WebSocket connection
       useEffect(() => {
         function connect() {
           const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -889,7 +848,6 @@
             try {
               const evt = JSON.parse(e.data);
               applyEvent(evt);
-              // Auto-select new process if none selected
               if (evt.process) {
                 setSelected(prev => prev || evt.process);
               }
