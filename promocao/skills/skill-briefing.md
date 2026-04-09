@@ -6,7 +6,7 @@ Transformar a lista de produtos selecionados para promoção em briefings estrut
 
 ## Inputs
 
-- promocoes_ativas: array — Lista de promoções (output do agente-analista), cada item com: produto, preco_original, preco_promocional, validade, justificativa
+- promocoes_ativas: array — Lista de promoções (output da etapa anterior), cada item com: produto, preco_original, preco_promocional, validade, justificativa
 - brand_book: object — Kit de marca da loja (lido de `config.json` → `brand_book`): paleta, fontes, tom_de_voz, logo
 - canais_ativos: array — Lista de canais habilitados (ex: ["instagram_feed"]). MVP: apenas "instagram_feed"
 

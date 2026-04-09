@@ -86,4 +86,4 @@ Produzir peças visuais a partir dos briefings estruturados. No MVP, gera 1 peç
 ### Fallback
 
 - Se API de geração indisponível ou quota excedida: informar ao operador "Geração de imagem indisponível. Verifique a API key e quota no config.json." Retornar objeto com `arquivo: null` e `erro: "api_indisponivel"`.
-- Se imagem gerada não atender qualidade: o agente-criativo pode solicitar nova geração com prompt ajustado (máximo 3 tentativas).
+- Se imagem gerada não atender qualidade: o agente responsável pode solicitar nova geração com prompt ajustado (máximo 3 tentativas).
