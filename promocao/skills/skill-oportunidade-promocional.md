@@ -7,8 +7,8 @@ Identificar produtos com potencial promocional cruzando análise externa (sazona
 ## Inputs
 
 - data_atual: string (ISO 8601) — Data de referência para análise sazonal
-- dados_estoque: array — Lista de produtos com quantidade em estoque e giro médio. Dataset: `estoque`
-- dados_vendas: array — Histórico de vendas por produto (últimos 3 meses). Dataset: `vendas`
+- dados_estoque: dataset `estoque` — Dados de estoque atual. Precisa conter, para cada produto: identificador do produto, nome/descrição, quantidade em estoque, giro médio (diário ou mensal), e se o produto é perecível. Estrutura e nomes de campos variam por fonte — o agente deve identificar a correspondência.
+- dados_vendas: dataset `vendas` — Histórico de vendas por produto (últimos 3 meses). Precisa conter: identificador do produto, nome/descrição, data da venda, quantidade vendida, valor vendido. Estrutura e nomes de campos variam por fonte — o agente deve identificar a correspondência.
 - negociacoes_fornecedor: array (opcional) — Produtos em negociação informados pelo usuário
 
 ## Outputs
@@ -37,7 +37,7 @@ Identificar produtos com potencial promocional cruzando análise externa (sazona
 
 1. Carregar `dados_estoque` e `dados_vendas` via config do processo
 2. Calcular para cada produto:
-   - Relação estoque/giro: `estoque_atual / giro_medio_diario` = dias de cobertura
+   - Relação estoque/giro: quantidade em estoque ÷ giro médio diário = dias de cobertura
    - Produtos com cobertura > 45 dias e venda declinante = candidatos
 3. Classificar produtos por urgência de saída:
    - Perecíveis com cobertura alta → prioridade máxima

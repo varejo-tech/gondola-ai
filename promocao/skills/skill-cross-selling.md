@@ -7,7 +7,7 @@ Identificar oportunidades de venda cruzada para os produtos selecionados, combin
 ## Inputs
 
 - produtos_alvo: array — Lista de produtos selecionados para promoção (output da skill-oportunidade-promocional)
-- dados_vendas_cupom: object — Acesso a vendas por cupom fiscal dos últimos 6 meses. Dataset: `vendas_cupom`
+- dados_vendas_cupom: dataset `vendas_cupom` — Dados de vendas detalhadas por transação (últimos 6 meses). Precisa conter: identificador da transação/cupom/nota fiscal, identificador do produto, nome/descrição do produto, data da venda. Estrutura e nomes de campos variam por fonte — o agente deve identificar a correspondência.
 
 ## Outputs
 
