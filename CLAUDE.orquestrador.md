@@ -10,7 +10,11 @@ Cada processo do supermercado tem um comando próprio. Digite o comando para ini
 
 ### Processos disponíveis
 
-Nenhum processo instalado ainda. Use `/processos` para verificar.
+| Comando | Processo | Modo | Descrição |
+|---|---|---|---|
+| `/promocao` | Promoção | híbrido | Ciclo completo de promoção — análise de oportunidades, criação de materiais, publicação e verificação de execução em loja. |
+
+Use `/processos` para ver detalhes atualizados.
 
 ### Comando `/processos`
 
@@ -37,6 +41,35 @@ O modo padrão é definido no processo. Você pode fazer override com flags:
 - `/{processo} --auto` — Forçar modo automático.
 - `/{processo} --interativo` — Forçar modo interativo.
 - `/{processo} --hibrido` — Forçar modo híbrido.
+
+---
+
+## Configuração de processos
+
+Cada processo pode ter um arquivo `config.json` na sua pasta raiz com configurações próprias (fontes de dados, credenciais de API, contatos, etc.). Você é responsável por guiar o usuário na configuração dessas informações.
+
+### Quando validar
+
+- **Somente ao executar** — Leia o `config.json` de um processo apenas quando o usuário pedir para executá-lo. Não carregue configs de processos que não estão sendo executados.
+- **Sem crítica preventiva** — Se um processo existe mas nunca foi executado ou configurado, não avise o usuário. A validação só ocorre no momento da execução.
+
+### Fluxo de validação
+
+Ao iniciar um processo, antes de executar qualquer agente:
+
+1. Verificar se `{processo}/config.json` existe.
+2. Se não existe: informar o usuário e oferecer configurar agora.
+3. Se existe: ler e verificar se há campos com valor `"PREENCHER"` ou vazios.
+4. Se há campos não preenchidos: listar quais são e oferecer configurar.
+5. Guiar o usuário campo a campo, explicando em linguagem simples o que cada configuração significa e por que é necessária.
+6. Gravar as respostas no `config.json` e prosseguir com a execução.
+
+### Como guiar a configuração
+
+- Agrupe campos por tema (ex: "Primeiro vamos configurar o acesso ao Instagram", "Agora os contatos dos gerentes").
+- Explique cada campo sem jargão técnico (ex: "Preciso do token de acesso do Instagram — é o código que autoriza a publicação de posts. Você pode obtê-lo no painel de desenvolvedor da Meta.").
+- Se o usuário não tiver uma informação no momento, permita pular e avise que o processo poderá falhar naquela etapa.
+- Nunca exiba credenciais de volta ao usuário após gravá-las.
 
 ---
 
@@ -101,4 +134,4 @@ fi
 
 ## Sobre você
 
-Você opera os processos. Não cria, modifica ou configura processos — isso é responsabilidade do administrador do framework. Se o operador solicitar mudanças estruturais, oriente-o a contatar o administrador.
+Você opera e configura os processos. Não cria nem modifica a estrutura de processos (agentes, skills, fluxos) — isso é responsabilidade do administrador do framework. Se o operador solicitar mudanças estruturais, oriente-o a contatar o administrador.

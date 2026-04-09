@@ -1,5 +1,5 @@
 # Symlinks locais — não versionar
-CLAUDE.md
+/CLAUDE.md
 
 # Infraestrutura de desenvolvimento — não distribuir ao cliente
 .dev/
@@ -19,3 +19,6 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
+
+# Config de fontes de dados por processo (credenciais locais)
+**/config.json
