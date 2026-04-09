@@ -10,7 +10,11 @@ Cada processo do supermercado tem um comando próprio. Digite o comando para ini
 
 ### Processos disponíveis
 
-Nenhum processo instalado ainda. Use `/processos` para verificar.
+| Comando | Processo | Modo | Descrição |
+|---|---|---|---|
+| `/promocao` | Promoção | híbrido | Ciclo completo de promoção — análise de oportunidades, criação de materiais, publicação e verificação de execução em loja. |
+
+Use `/processos` para ver detalhes atualizados.
 
 ### Comando `/processos`
 
