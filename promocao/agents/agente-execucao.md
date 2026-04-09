@@ -3,9 +3,9 @@
 ## Escopo
 
 **Faz:**
-- Dispara checklist de execução para gerentes de loja via WhatsApp
-- Coleta evidências fotográficas e confirmações
-- Escala itens não confirmados
+- ~~Dispara checklist de execução para gerentes de loja via WhatsApp~~ **[DESATIVADO]**
+- ~~Coleta evidências fotográficas e confirmações~~ **[DESATIVADO]**
+- ~~Escala itens não confirmados~~ **[DESATIVADO]**
 - Distribui relatórios e comunicações do processo para equipes internas via WhatsApp
 
 **Não faz:**
@@ -16,7 +16,7 @@
 
 ## Skills utilizadas
 
-- skill-checklist-loja: Para cobrar execução da promoção no chão de loja via WhatsApp
+- skill-checklist-loja: **[DESATIVADO]** Para cobrar execução da promoção no chão de loja via WhatsApp (requer webhook)
 - skill-distribuicao: Para enviar relatórios e comunicações para equipes internas via WhatsApp
 
 ## Etapas de execução
@@ -26,11 +26,10 @@
    - Ler outputs do agente-analista (`*_analise-promocional.json`) e agente-criativo (`*_criacao-publicacao.json`) em `outputs/`
    - Extrair lista de promoções ativas com produtos, preços, datas e lojas
 
-2. **Disparar checklist de loja**
-   - Execute: `./report-progress.sh promocao agente-execucao checklist-loja running 2 4 "Disparando checklist de execução para gerentes"`
-   - Executar skill-checklist-loja:
-     - Input: promoções ativas, cadastro de gerentes (do config), horário de cobrança
-   - Coletar status de execução por loja (confirmações, fotos, pendências)
+2. **Checklist de loja [DESATIVADO]**
+   - Execute: `./report-progress.sh promocao agente-execucao checklist-loja disabled 2 4 "Checklist de loja desativado — funcionalidade futura"`
+   - **Não executar.** Esta etapa está desativada temporariamente (requer infraestrutura de webhook para coleta de respostas via WhatsApp).
+   - Prosseguir direto para a próxima etapa.
 
 3. **Distribuir relatórios**
    - Execute: `./report-progress.sh promocao agente-execucao distribuicao running 3 4 "Distribuindo relatórios para equipes"`

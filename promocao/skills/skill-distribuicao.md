@@ -2,30 +2,25 @@
 
 ## Propósito
 
-Enviar relatórios e comunicações da promoção para lista de contatos via WhatsApp. Utilizada para distribuir outputs do processo (relatório de concorrentes, resumo da promoção, etc.) para equipes internas.
+Enviar relatórios e comunicações da promoção para lista de contatos via WhatsApp. Delega o envio para um workflow no n8n via webhook, que cuida do fluxo de templates e entrega das mensagens.
 
 ## Inputs
 
 - conteudo: object — Output a distribuir, com:
   - titulo: string — Título do relatório/comunicação
   - corpo: string — Conteúdo formatado para envio
-  - anexos: array (opcional) — Caminhos de arquivos para enviar (imagens, PDFs)
-- destinatarios: array — Lista de contatos: nome, whatsapp (lido de `config.json` → `contatos.equipe_comercial` ou `contatos.gerentes`)
+  - tipo: string — Tipo do relatório ("resumo-promocao" | "relatorio-concorrentes" | "confirmacao-publicacao")
+- destinatarios: array — Lista de contatos: nome, whatsapp, loja (lido de `config.json` → `contatos.equipe_comercial` ou `contatos.gerentes`)
 - formato_envio: string — "resumo" | "completo" | "destaque". Default: "resumo"
-- phone_number_id: string — ID do número WhatsApp Business (lido de `config.json` → `whatsapp.phone_number_id`)
-- access_token: string — Token de acesso Meta API (lido de `config.json` → `whatsapp.access_token`)
+- webhook_url: string — URL do webhook n8n (lido de `config.json` → `whatsapp.url_distribuicao`)
 
 ## Outputs
 
 - registro_envio: object — Confirmação de distribuição:
   - data_envio: string — Timestamp do envio
   - conteudo_titulo: string — Título do que foi enviado
-  - destinatarios: array — Para cada destinatário:
-    - nome: string — Nome do contato
-    - whatsapp: string — Número
-    - status: string — "enviado" | "erro"
-    - message_id: string (opcional) — ID da mensagem no WhatsApp
-    - erro: string (opcional) — Descrição do erro se falhou
+  - webhook_status: number — HTTP status code da resposta do n8n
+  - webhook_response: object — Resposta do n8n (formato livre, depende do workflow)
 
 ## Implementação
 
@@ -33,53 +28,63 @@ Enviar relatórios e comunicações da promoção para lista de contatos via Wha
 
 1. Preparar conteúdo conforme `formato_envio`:
    - "resumo": Extrair pontos principais, limitar a 500 caracteres
-   - "completo": Enviar corpo integral (quebrar em múltiplas mensagens se > 4096 caracteres)
+   - "completo": Enviar corpo integral
    - "destaque": Apenas título + top 3 informações mais relevantes
-2. Para cada destinatário em `destinatarios`:
-   a. Enviar mensagem de texto com o conteúdo formatado
-   b. Se houver anexos: enviar cada anexo como mensagem de mídia separada
-   c. Registrar status do envio
-3. Consolidar `registro_envio`
+2. Montar payload para o webhook:
+   ```json
+   {
+     "relatorio": {
+       "tipo": "{conteudo.tipo}",
+       "data": "{YYYY-MM-DD}",
+       "conteudo": "{conteudo_formatado}"
+     },
+     "destinatarios": [
+       {"nome": "...", "whatsapp": "+55...", "loja": "..."}
+     ]
+   }
+   ```
+3. Enviar POST para `webhook_url` com o payload
+4. Registrar resposta do webhook
+
+### Schema do payload
+
+O workflow n8n recebe o payload e pode acessar:
+
+| Campo | Acesso no n8n | Descrição |
+|---|---|---|
+| Tipo do relatório | `$json.body.relatorio.tipo` | Identifica qual template usar |
+| Data | `$json.body.relatorio.data` | Data de referência da promoção |
+| Texto da mensagem | `$json.body.relatorio.conteudo` | Conteúdo formatado para envio |
+| Destinatários | `$json.body.destinatarios` | Array de contatos |
+| Nome do contato | `$json.body.destinatarios[n].nome` | Para personalização |
+| WhatsApp | `$json.body.destinatarios[n].whatsapp` | Número no formato +55... |
+| Loja | `$json.body.destinatarios[n].loja` | Para segmentação |
 
 ### Casos de uso
 
-- Enviar relatório de preços dos concorrentes (output da skill-pesquisa-concorrente) para equipe comercial
-- Enviar resumo da promoção ativa para gerentes
-- Enviar confirmação de publicação (link do post) para equipe de marketing
+- Enviar relatório de preços dos concorrentes (output da skill-pesquisa-concorrente) para equipe comercial → tipo: `relatorio-concorrentes`
+- Enviar resumo da promoção ativa para gerentes → tipo: `resumo-promocao`
+- Enviar confirmação de publicação (link do post) para equipe de marketing → tipo: `confirmacao-publicacao`
 
-### API/MCP
+### Chamada
 
-**Endpoint:** WhatsApp Business API — `https://graph.facebook.com/v19.0`
-
-**Autenticação:** Bearer token (lido de `config.json` → `whatsapp.access_token`)
-
-**Chamadas:**
-
-1. Enviar mensagem de texto:
-   - `POST /{phone_number_id}/messages`
-   - Body:
-```json
-{
-  "messaging_product": "whatsapp",
-  "to": "{numero_destinatario}",
-  "type": "text",
-  "text": { "body": "{conteudo_formatado}" }
-}
-```
-
-2. Enviar mídia (imagem/documento):
-   - `POST /{phone_number_id}/messages`
-   - Body:
-```json
-{
-  "messaging_product": "whatsapp",
-  "to": "{numero_destinatario}",
-  "type": "image",
-  "image": { "link": "{url_da_imagem}", "caption": "{legenda}" }
-}
+```bash
+curl -s -X POST "{webhook_url}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "relatorio": {
+      "tipo": "resumo-promocao",
+      "data": "2026-04-09",
+      "conteudo": "Promoção ativa: Picanha Friboi de R$69,90 por R$49,90 (-29%). Válida até 12/04. Publicada no Instagram às 08:00."
+    },
+    "destinatarios": [
+      {"nome": "João", "whatsapp": "+5585999999999", "loja": "Centro"},
+      {"nome": "Maria", "whatsapp": "+5585888888888", "loja": "Sul"}
+    ]
+  }'
 ```
 
 ### Fallback
 
-- Se WhatsApp API indisponível: informar ao operador "Não foi possível distribuir o relatório via WhatsApp. Verifique as credenciais no config.json." Retornar com lista de destinatários não alcançados.
-- Se envio falhar para destinatário específico: registrar erro e continuar com próximo destinatário. Não interromper o lote.
+- Se webhook indisponível (erro de conexão ou timeout): informar ao operador "Não foi possível distribuir o relatório. Verifique se o workflow n8n está ativo e a URL no config.json está correta." Retornar com `webhook_status: null` e `erro: "webhook_indisponivel"`.
+- Se webhook retornar erro (status >= 400): registrar o status e a resposta. Informar ao operador o código de erro recebido.

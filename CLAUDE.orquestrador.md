@@ -71,6 +71,43 @@ Ao iniciar um processo, antes de executar qualquer agente:
 - Se o usuário não tiver uma informação no momento, permita pular e avise que o processo poderá falhar naquela etapa.
 - Nunca exiba credenciais de volta ao usuário após gravá-las.
 
+### Configurações específicas por processo
+
+#### Promoção — Instagram (obrigatórias para pesquisa de concorrentes e publicação)
+
+Ao configurar o processo de promoção, dê atenção especial aos campos do Instagram. Sem eles, a pesquisa de concorrentes e a publicação de peças não funcionam.
+
+| Campo | Como explicar ao usuário |
+|---|---|
+| `instagram_business_id` | "Preciso do ID do seu Instagram Business — é o número que identifica sua conta profissional do Instagram dentro da Meta. Sua conta precisa ser do tipo Business e estar vinculada a uma Business Manager. Você encontra esse ID nas configurações da sua conta Business no Meta Business Suite." |
+| `access_token` | "Preciso do token de acesso do System User da sua Business Manager. É o código que autoriza o acesso à API da Meta. Você pode gerá-lo no painel de desenvolvedores da Meta (Business Settings → System Users). O token precisa ter as permissões: instagram_basic, business_management e pages_read_engagement." |
+| `perfis_concorrentes` | "Quais são os perfis de Instagram dos seus concorrentes que você quer monitorar? Pode me passar o nome de usuário (ex: fortatacadista) ou o link do perfil (ex: https://www.instagram.com/fortatacadista/). Pode listar quantos quiser." |
+| `perfil_publicacao` | "Qual é o perfil do Instagram da sua loja onde serão publicadas as peças promocionais?" |
+
+**Importante:** Se `perfis_concorrentes` estiver vazio ou com valores padrão (`["PREENCHER"]`), a pesquisa de concorrentes não será executada. Informe o usuário e solicite que preencha antes de prosseguir com o processo.
+
+#### Promoção — Assets visuais (opcionais, ofereça proativamente)
+
+Após configurar os campos obrigatórios, ofereça ao usuário configurar os assets visuais. Esses materiais melhoram muito a qualidade das peças geradas pela IA. São opcionais — o processo funciona sem eles, mas o resultado será genérico.
+
+| Campo | Como explicar ao usuário |
+|---|---|
+| `assets_visuais.logo` | "Você tem o logo da sua loja em arquivo digital (PNG ou JPG)? Se me passar o caminho do arquivo, a IA vai incluir automaticamente nas peças promocionais." |
+| `assets_visuais.templates` | "Você tem encartes ou posts anteriores da loja que gostaria de usar como referência de estilo? Pode ser um encarte impresso escaneado, um post antigo do Instagram, ou qualquer material visual da loja. A IA vai usar como base para manter a identidade visual." |
+| `assets_visuais.fotos_produtos` | "Você tem uma pasta com fotos dos seus produtos? Se tiver, a IA pode usar as fotos reais em vez de gerar imagens genéricas. Fica muito mais profissional." |
+
+**Tom:** Apresente como algo que melhora o resultado, não como obrigação. Se o usuário não tiver agora, diga que pode configurar depois a qualquer momento.
+
+#### Promoção — WhatsApp (obrigatória para distribuição de relatórios)
+
+O envio de mensagens WhatsApp é feito via webhook do n8n. O usuário precisa configurar apenas a URL do webhook.
+
+| Campo | Como explicar ao usuário |
+|---|---|
+| `whatsapp.url_distribuicao` | "Preciso da URL do webhook do n8n que você criou para enviar as mensagens de WhatsApp. É o endereço que aparece no nó de Webhook do seu workflow (algo como https://seu-n8n.com/webhook/distribuicao-promocao)." |
+
+**Importante:** Sem essa URL, a distribuição de relatórios via WhatsApp não funcionará. O processo continua normalmente até a publicação, mas a Fase 3 (distribuição) será afetada.
+
 ---
 
 ## Dependências entre processos

@@ -17,9 +17,34 @@ Cada dataset suporta múltiplos tipos de fonte: `arquivo` (Excel, CSV), `api` (e
 | `estoque` | skill-oportunidade-promocional | Dados de estoque atual |
 | `vendas` | skill-oportunidade-promocional | Histórico de vendas |
 | `vendas_cupom` | skill-cross-selling | Vendas por cupom fiscal (últimos 6 meses) |
-| `instagram` | skill-pesquisa-concorrente, skill-publicacao | Meta API — Instagram Graph |
-| `whatsapp` | skill-checklist-loja, skill-distribuicao | Meta API — WhatsApp Business |
-| `imagen` | skill-geracao-imagem | Google API — Imagen |
+| `instagram` | skill-pesquisa-concorrente, skill-publicacao | Meta API — Instagram Graph (Business Discovery) |
+| `whatsapp` | skill-checklist-loja, skill-distribuicao | Webhook n8n — envio de mensagens WhatsApp |
+| `gemini` | skill-geracao-imagem | Gemini API — Nano Banana 2 (geração de imagem) |
+
+### Configurações obrigatórias do Instagram
+
+O dataset `instagram` requer configurações que o usuário deve preencher antes de executar o processo:
+
+| Parâmetro | Descrição | Exemplo |
+|---|---|---|
+| `instagram_business_id` | ID do Instagram Business do usuário, vinculado à Business Manager | `17841400123456789` |
+| `access_token` | Token do System User com permissões adequadas (`instagram_basic`, `business_management`, `pages_read_engagement`) | Token da Meta |
+| `perfis_concorrentes` | Lista de perfis de concorrentes a monitorar. Aceita username ou link do perfil. | `["fortatacadista", "https://www.instagram.com/atacadao/"]` |
+| `perfil_publicacao` | Username do perfil onde serão publicadas as peças | Username do Instagram da loja |
+
+**Estas configurações são solicitadas pelo Orquestrador ao configurar o processo de promoção.** O processo não deve ser executado sem que estejam preenchidas.
+
+### Assets visuais (opcionais, recomendados)
+
+A seção `assets_visuais` do config.json permite ao usuário fornecer materiais visuais que melhoram significativamente a qualidade das peças geradas. São opcionais — sem eles a geração funciona apenas com prompt de texto.
+
+| Parâmetro | Descrição | Exemplo |
+|---|---|---|
+| `logo` | Caminho para o arquivo de logo da loja (PNG/JPG) | `/caminho/para/logo.png` |
+| `templates` | Lista de caminhos para templates de referência visual — encartes anteriores, posts de referência, materiais da marca | `["/caminho/template1.png", "/caminho/template2.jpg"]` |
+| `fotos_produtos` | Diretório contendo fotos dos produtos (nomeadas pelo código ou descrição) | `/caminho/para/fotos/` |
+
+**Estas configurações são oferecidas pelo Orquestrador durante a configuração do processo.** O usuário pode pular e configurar depois.
 
 ### Template do config.json
 

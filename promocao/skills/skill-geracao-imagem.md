@@ -2,13 +2,16 @@
 
 ## Propósito
 
-Produzir peças visuais a partir dos briefings estruturados. No MVP, gera 1 peça de post para feed do Instagram (1080×1080).
+Produzir peças visuais a partir dos briefings estruturados usando o modelo Gemini Nano Banana 2 com input multimodal. No MVP, gera 1 peça de post para feed do Instagram (1080×1080).
 
 ## Inputs
 
-- briefing_peca: object — Briefing de uma peça (output da skill-briefing → `pecas[n]`), contendo: prompt_imagem, produtos_destaque, formato, headline
+- briefing_peca: object — Briefing de uma peça (output da skill-briefing → `pecas[n]`), contendo: prompt_imagem, produtos_destaque, formato, headline, legenda
 - kit_marca: object — Logo, paleta, fontes, selos (lido de `config.json` → `brand_book`)
-- fotos_produtos: array (opcional) — Caminhos para fotos dos produtos
+- assets_visuais: object (opcional) — Assets visuais configurados pelo usuário (lido de `config.json` → `assets_visuais`):
+  - logo: string — Caminho para o logo da loja
+  - templates: array — Caminhos para templates de referência visual (ex: encartes anteriores, posts de referência)
+  - fotos_produtos: string — Diretório com fotos de produtos
 
 ## Outputs
 
@@ -23,15 +26,58 @@ Produzir peças visuais a partir dos briefings estruturados. No MVP, gera 1 peç
 ### Passos
 
 1. Receber `briefing_peca` com prompt descritivo da composição
-2. Montar prompt final para API de geração de imagem:
-   - Base: `briefing_peca.prompt_imagem`
-   - Adicionar especificações de marca: cores da paleta, estilo do logo
-   - Adicionar regras de composição (ver abaixo)
+2. Coletar assets visuais disponíveis:
+   - Se `assets_visuais.logo` configurado e arquivo existe → incluir como imagem de referência
+   - Se `assets_visuais.templates` configurado → incluir templates como referência de estilo
+   - Se `assets_visuais.fotos_produtos` configurado → buscar fotos dos produtos listados em `briefing_peca.produtos_destaque`
+3. Montar request multimodal para a API:
+   - Parte texto: prompt combinando `briefing_peca.prompt_imagem` + especificações de marca (paleta, estilo) + regras de composição (ver abaixo)
+   - Partes imagem (quando disponíveis): logo, templates de referência, fotos de produtos
+   - Instruções de estilo: "Mantenha o estilo visual dos templates de referência", "Incorpore o logo na composição", "Use as fotos reais dos produtos"
    - Formato de saída: 1080×1080 pixels
-3. Enviar prompt para API de geração de imagem (Google Imagen)
-4. Receber imagem gerada
-5. Salvar imagem em `outputs/` com nome: `{YYYY-MM-DD}_peca-{canal}-{indice}.png`
-6. Retornar referência ao arquivo gerado
+4. Enviar request para Gemini API (`generateContent`)
+5. Extrair imagem da resposta (iterar `parts`, buscar `inline_data` com mimeType de imagem)
+6. Decodificar base64 e salvar em `outputs/` com nome: `{YYYY-MM-DD}_peca-{canal}-{indice}.png`
+7. Retornar referência ao arquivo gerado
+
+### Montagem do prompt
+
+O prompt de texto combina 3 blocos:
+
+**Bloco 1 — Instrução de geração:**
+```
+Gere uma imagem promocional de supermercado no formato 1080x1080 pixels para post de Instagram.
+```
+
+**Bloco 2 — Briefing criativo (do skill-briefing):**
+```
+{briefing_peca.prompt_imagem}
+```
+
+**Bloco 3 — Regras de marca e composição:**
+```
+Estilo de marca:
+- Paleta de cores: {brand_book.paleta}
+- Tom: {brand_book.tom_de_voz}
+[Se logo anexado]: Incorpore o logo da loja na composição (canto inferior ou superior).
+[Se templates anexados]: Use os templates anexados como referência de estilo visual. Mantenha a mesma linguagem gráfica.
+[Se fotos de produtos anexadas]: Use as fotos reais dos produtos na composição.
+```
+
+### Montagem do request multimodal
+
+```
+parts: [
+  { text: <prompt combinado> },
+  { inline_data: <logo> },           // se disponível
+  { inline_data: <template_1> },     // se disponível
+  { inline_data: <template_N> },     // se disponível
+  { inline_data: <foto_produto_1> }, // se disponível
+  { inline_data: <foto_produto_N> }  // se disponível
+]
+```
+
+Cada `inline_data` contém `mime_type` (ex: `image/png`) e `data` (base64 do arquivo).
 
 ### Regras de composição
 
@@ -53,20 +99,28 @@ Produzir peças visuais a partir dos briefings estruturados. No MVP, gera 1 peç
 
 ### API/MCP
 
-**Endpoint:** Google Imagen API — `https://generativelanguage.googleapis.com/v1beta`
+**Modelo:** Gemini Nano Banana 2 — `gemini-3.1-flash-image-preview`
 
-**Autenticação:** API Key (lida de `config.json` → `imagen.api_key`)
+**Endpoint:** Gemini API — `https://generativelanguage.googleapis.com/v1beta`
+
+**Autenticação:** API Key (lida de `config.json` → `gemini.api_key`)
 
 **Chamada:**
-- `POST /models/imagen-3.0-generate-002:predict`
+- `POST /models/gemini-3.1-flash-image-preview:generateContent?key={api_key}`
 - Body:
 ```json
 {
-  "instances": [{"prompt": "..."}],
-  "parameters": {
-    "sampleCount": 1,
-    "aspectRatio": "1:1",
-    "safetyFilterLevel": "block_few"
+  "contents": [
+    {
+      "parts": [
+        {"text": "...prompt combinado..."},
+        {"inline_data": {"mime_type": "image/png", "data": "...base64 do logo..."}},
+        {"inline_data": {"mime_type": "image/png", "data": "...base64 do template..."}}
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"]
   }
 }
 ```
@@ -74,16 +128,23 @@ Produzir peças visuais a partir dos briefings estruturados. No MVP, gera 1 peç
 **Resposta esperada:**
 ```json
 {
-  "predictions": [
+  "candidates": [
     {
-      "bytesBase64Encoded": "...",
-      "mimeType": "image/png"
+      "content": {
+        "parts": [
+          {"text": "Aqui está a peça promocional..."},
+          {"inline_data": {"mime_type": "image/png", "data": "...base64..."}}
+        ]
+      }
     }
   ]
 }
 ```
 
+**Extração da imagem:** Iterar `candidates[0].content.parts`, buscar a part que contém `inline_data` com `mime_type` começando em `image/`. Decodificar `data` de base64 para bytes e salvar como arquivo.
+
 ### Fallback
 
-- Se API de geração indisponível ou quota excedida: informar ao operador "Geração de imagem indisponível. Verifique a API key e quota no config.json." Retornar objeto com `arquivo: null` e `erro: "api_indisponivel"`.
+- Se API indisponível ou quota excedida: informar ao operador "Geração de imagem indisponível. Verifique a API key e quota no config.json." Retornar objeto com `arquivo: null` e `erro: "api_indisponivel"`.
 - Se imagem gerada não atender qualidade: o agente responsável pode solicitar nova geração com prompt ajustado (máximo 3 tentativas).
+- Se assets visuais não configurados: gerar normalmente apenas com prompt de texto. A qualidade será inferior mas funcional. Informar ao operador que configurar assets visuais melhora significativamente o resultado.

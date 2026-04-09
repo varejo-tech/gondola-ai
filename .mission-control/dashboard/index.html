@@ -217,12 +217,16 @@
     .badge-idle { background: rgba(148, 163, 184, 0.1); color: var(--text-white-dim); }
     .badge-idle .badge-dot { background: var(--text-white-dim); }
 
+    .badge-disabled { background: rgba(148, 163, 184, 0.08); color: #64748b; }
+    .badge-disabled .badge-dot { background: #64748b; opacity: 0.5; }
+
     /* Badges on white cards */
     .card-badge .badge-active { background: var(--lime-soft); color: #6d8a0a; }
     .card-badge .badge-completed { background: var(--green-soft); color: #16a34a; }
     .card-badge .badge-error { background: var(--red-soft); color: var(--red); }
     .card-badge .badge-waiting { background: var(--yellow-soft); color: #a16207; }
     .card-badge .badge-idle { background: #f1f5f9; color: var(--text-dark-muted); }
+    .card-badge .badge-disabled { background: #f1f5f9; color: #94a3b8; }
 
     .process-meta {
       display: flex;
@@ -287,6 +291,11 @@
     .agent-card.status-running,
     .agent-card.status-started {
       border-left: 3px solid var(--lime);
+    }
+
+    .agent-card.status-disabled {
+      border-left: 3px dashed #94a3b8;
+      opacity: 0.6;
     }
 
     .agent-card-header {
@@ -438,6 +447,7 @@
     .status-text { font-weight: 600; font-size: 12px; }
     .status-text.started, .status-text.running { color: #6d8a0a; }
     .status-text.completed { color: #16a34a; }
+    .status-text.disabled { color: #94a3b8; font-style: italic; }
     .status-text.error { color: var(--red); }
     .status-text.waiting { color: #a16207; }
 
@@ -514,6 +524,7 @@
         case 'completed': return 'badge-completed';
         case 'error': return 'badge-error';
         case 'waiting': return 'badge-waiting';
+        case 'disabled': return 'badge-disabled';
         default: return 'badge-idle';
       }
     }
@@ -521,7 +532,8 @@
     function getStatusLabel(status) {
       const labels = {
         active: 'ATIVO', started: 'INICIADO', running: 'EXECUTANDO',
-        completed: 'CONCLUÍDO', error: 'ERRO', waiting: 'AGUARDANDO', idle: 'OCIOSO'
+        completed: 'CONCLUÍDO', error: 'ERRO', waiting: 'AGUARDANDO',
+        disabled: 'DESATIVADO', idle: 'OCIOSO'
       };
       return labels[status] || status?.toUpperCase() || 'OCIOSO';
     }
