@@ -1,1 +1,1 @@
-../.dev/memory.dev.md
+../memory.op.md
