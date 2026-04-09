@@ -1,0 +1,109 @@
+const Database = require('better-sqlite3');
+const path = require('path');
+const fs = require('fs');
+
+const DB_DIR = path.join(__dirname, '..', 'db');
+const DB_PATH = path.join(DB_DIR, 'events.db');
+
+if (!fs.existsSync(DB_DIR)) {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+}
+
+const db = new Database(DB_PATH);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS events (
+    event_id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL,
+    session_id TEXT,
+    source TEXT NOT NULL,
+    type TEXT NOT NULL,
+    process TEXT,
+    agent TEXT,
+    task TEXT,
+    payload TEXT
+  )
+`);
+
+const insertStmt = db.prepare(`
+  INSERT INTO events (event_id, timestamp, session_id, source, type, process, agent, task, payload)
+  VALUES (@event_id, @timestamp, @session_id, @source, @type, @process, @agent, @task, @payload)
+`);
+
+function insertEvent(event) {
+  insertStmt.run({
+    event_id: event.event_id,
+    timestamp: event.timestamp,
+    session_id: event.session_id || null,
+    source: event.source,
+    type: event.type,
+    process: event.process || null,
+    agent: event.agent || null,
+    task: event.task || null,
+    payload: JSON.stringify(event.payload || {})
+  });
+}
+
+function getAllEvents() {
+  return db.prepare('SELECT * FROM events ORDER BY timestamp ASC').all().map(row => ({
+    ...row,
+    payload: JSON.parse(row.payload || '{}')
+  }));
+}
+
+function getState() {
+  const events = getAllEvents();
+  const state = { processes: {}, hooks: [], session_id: null, event_count: events.length };
+
+  for (const evt of events) {
+    if (evt.session_id) state.session_id = evt.session_id;
+
+    if (evt.type === 'process_start' && evt.process) {
+      if (!state.processes[evt.process]) {
+        state.processes[evt.process] = { status: 'active', agents: {} };
+      }
+      state.processes[evt.process].status = 'active';
+    } else if (evt.type === 'process_end' && evt.process) {
+      if (state.processes[evt.process]) {
+        state.processes[evt.process].status = 'completed';
+      }
+    } else if (evt.type === 'progress' && evt.process) {
+      if (!state.processes[evt.process]) {
+        state.processes[evt.process] = { status: 'active', agents: {} };
+      }
+      const proc = state.processes[evt.process];
+      if (evt.agent) {
+        if (!proc.agents[evt.agent]) {
+          proc.agents[evt.agent] = { status: 'running', tasks: {} };
+        }
+        const agent = proc.agents[evt.agent];
+        agent.status = evt.payload.status || agent.status;
+
+        if (evt.task) {
+          agent.tasks[evt.task] = {
+            status: evt.payload.status || 'running',
+            step: evt.payload.step || 0,
+            total_steps: evt.payload.total_steps || 0,
+            message: evt.payload.message || '',
+            timestamp: evt.timestamp
+          };
+        }
+      }
+    } else if (evt.type === 'tool_start' || evt.type === 'tool_end' || evt.type === 'tool_error') {
+      state.hooks.push({
+        type: evt.type,
+        tool: evt.payload.tool,
+        input_preview: evt.payload.input_preview,
+        timestamp: evt.timestamp
+      });
+    }
+  }
+
+  return state;
+}
+
+function getDb() {
+  return db;
+}
+
+module.exports = { insertEvent, getAllEvents, getState, getDb };

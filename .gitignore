@@ -1,0 +1,18 @@
+# Symlinks locais — não versionar
+CLAUDE.md
+
+# Infraestrutura de desenvolvimento — não distribuir ao cliente
+.dev/
+
+# Memória de operação local
+memory.op.md
+
+# Outputs de teste
+.dev/test-outputs/
+
+# Mission Control DB
+.mission-control/db/
+
+# OS
+.DS_Store
+Thumbs.db
