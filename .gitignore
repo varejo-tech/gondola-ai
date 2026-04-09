@@ -13,6 +13,9 @@ memory.op.md
 # Mission Control DB
 .mission-control/db/
 
+# Dependências
+node_modules/
+
 # OS
 .DS_Store
 Thumbs.db
