@@ -61,6 +61,18 @@ function getState() {
     event_count: events.length,
   };
 
+  // Primeira passada: encontrar o timestamp do process_start mais recente por processo.
+  // Eventos de progress anteriores a esse marco são descartados — garante que uma nova
+  // execução zere o estado visual do processo no Mission Control.
+  const latestStartByProcess = {};
+  for (const evt of events) {
+    if (evt.type === 'process_start' && evt.process) {
+      if (!latestStartByProcess[evt.process] || evt.timestamp > latestStartByProcess[evt.process]) {
+        latestStartByProcess[evt.process] = evt.timestamp;
+      }
+    }
+  }
+
   for (const evt of events) {
     if (evt.session_id) state.session_id = evt.session_id;
 
@@ -74,6 +86,10 @@ function getState() {
         state.processes[evt.process].status = 'completed';
       }
     } else if (evt.type === 'progress' && evt.process) {
+      // Descarta eventos de progress anteriores ao último process_start deste processo.
+      const latestStart = latestStartByProcess[evt.process];
+      if (latestStart && evt.timestamp < latestStart) continue;
+
       if (!state.processes[evt.process]) {
         state.processes[evt.process] = { status: 'active', agents: {} };
       }

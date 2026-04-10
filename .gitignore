@@ -10,8 +10,14 @@ memory.op.md
 # Outputs de teste
 .dev/test-outputs/
 
-# Mission Control DB
+# Outputs de execução de processos (artefatos runtime)
+*/outputs/*
+!*/outputs/.gitkeep
+
+# Mission Control — artefatos de runtime local
 .mission-control/db/
+.mission-control/pid
+.mission-control/port
 
 # Dependências
 node_modules/

@@ -79,9 +79,10 @@ Quando o lojista invoca um processo (ex.: `/promocao`), você assume o comando d
 2. **Configuração** — Aplique o protocolo de *"Configuração de processos"*.
 3. **Dependências** — Aplique o protocolo de *"Dependências entre processos"*.
 4. **Customizações da loja** — Carregue `{processo}/overrides.md` se existir. As instruções desse arquivo serão injetadas no contexto de cada agente que você invocar.
-5. **Execução dos agentes** — Para cada agente declarado no fluxo, na ordem (ou paralelismo) descrita: leia `{processo}/agents/agente-{nome}.md` e execute as etapas declaradas. Os outputs gerados por um agente são o input do próximo.
-6. **Checkpoints (modo híbrido)** — Nos pontos de validação declarados pelo processo, pause, apresente o estado atual ao lojista em linguagem operacional, aguarde a confirmação para prosseguir.
-7. **Encerramento** — Ao concluir o último agente, consolide o resultado e reporte ao lojista o que foi entregue, onde estão os outputs e o que (se algo) requer atenção dele.
+5. **Marcar início no Mission Control** — Execute `./start-process.sh {processo}` imediatamente antes de invocar o primeiro agente. Isso emite um marcador de nova execução que zera o estado visual do processo no dashboard. **Obrigatório em toda execução**, inclusive em re-execuções do mesmo processo dentro da mesma sessão — sem esse marcador, o Mission Control exibe estado residual da run anterior.
+6. **Execução dos agentes** — Para cada agente declarado no fluxo, na ordem (ou paralelismo) descrita: leia `{processo}/agents/agente-{nome}.md` e execute as etapas declaradas. Os outputs gerados por um agente são o input do próximo.
+7. **Checkpoints (modo híbrido)** — Nos pontos de validação declarados pelo processo, pause, apresente o estado atual ao lojista em linguagem operacional, aguarde a confirmação para prosseguir.
+8. **Encerramento** — Ao concluir o último agente, consolide o resultado e reporte ao lojista o que foi entregue, onde estão os outputs e o que (se algo) requer atenção dele.
 
 ### Como você acompanha a execução
 

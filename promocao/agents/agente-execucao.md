@@ -41,20 +41,23 @@ Não emita `report-progress` para esta leitura — é bootstrap do agente, não 
 
 ## Etapas de execução
 
+> **Convenção de progresso:** cada task tem seu próprio ciclo `started → completed`. O contador `step/total` é **por task**, não global. Tasks desativadas emitem um único evento `disabled 1 1`.
+
 1. **Carregar promoções ativas**
-   - Execute: `./report-progress.sh promocao agente-execucao preparacao started 1 6 "Carregando promoções ativas"`
+   - Execute: `./report-progress.sh promocao agente-execucao preparacao started 1 2 "Carregando promoções ativas"`
    - Ler outputs do agente-analista (`promocao/outputs/*_analise-promocional.json`) e do agente-criativo (`promocao/outputs/*_criacao-publicacao.json`).
    - Extrair: lista de promoções ativas com produtos, preços, datas, peças publicadas.
    - Carregar `promocao/config.json` para obter `whatsapp.url_distribuicao`, `contatos.equipe_comercial`, `contatos.gerentes` e `assets_visuais` (logo, etc.).
    - Carregar `relatorio_concorrentes` (output da skill-pesquisa-concorrente, gravado pelo agente-analista junto da análise consolidada).
+   - Execute: `./report-progress.sh promocao agente-execucao preparacao completed 2 2 "Promoções ativas carregadas"`
 
 2. **Checklist de loja [DESATIVADO]**
-   - Execute: `./report-progress.sh promocao agente-execucao checklist-loja disabled 2 6 "Checklist de loja desativado — funcionalidade futura"`
+   - Execute: `./report-progress.sh promocao agente-execucao checklist-loja disabled 1 1 "Checklist de loja desativado — funcionalidade futura"`
    - **Não executar.** Esta etapa está desativada (requer infraestrutura de webhook para coleta de respostas via WhatsApp).
    - Prosseguir direto para a próxima etapa.
 
 3. **Preparar e distribuir relatório de concorrentes**
-   - Execute: `./report-progress.sh promocao agente-execucao relatorio-concorrentes running 3 6 "Gerando relatório de concorrentes em PDF"`
+   - Execute: `./report-progress.sh promocao agente-execucao relatorio-concorrentes started 1 2 "Gerando relatório de concorrentes em PDF"`
    - Invocar `skill-redacao-relatorio-concorrentes` com:
      - `relatorio_concorrentes`: do output do analista
      - `identificacao_loja`: nome da loja (do config)
@@ -72,9 +75,10 @@ Não emita `report-progress` para esta leitura — é bootstrap do agente, não 
      - `webhook_url`: `config.whatsapp.url_distribuicao`
    - Se `skill-distribuicao` retornar `modo: "local"`, registrar isso no log do agente — a etapa é sucesso, não erro.
    - Se retornar erro real (webhook indisponível, falha de envio): reportar `error` ao Orquestrador antes de prosseguir.
+   - Execute: `./report-progress.sh promocao agente-execucao relatorio-concorrentes completed 2 2 "Relatório de concorrentes distribuído"`
 
 4. **Preparar e distribuir resumo da promoção**
-   - Execute: `./report-progress.sh promocao agente-execucao resumo-promocao running 4 6 "Gerando resumo da promoção em PDF"`
+   - Execute: `./report-progress.sh promocao agente-execucao resumo-promocao started 1 2 "Gerando resumo da promoção em PDF"`
    - Invocar `skill-redacao-resumo-promocao` com:
      - `analise_promocional`: do output do analista
      - `registro_publicacao`: do output do criativo
@@ -91,9 +95,10 @@ Não emita `report-progress` para esta leitura — é bootstrap do agente, não 
      - `arquivo_pdf`: path do PDF
      - `webhook_url`: `config.whatsapp.url_distribuicao`
    - Tratamento de modo local e erros idêntico ao da etapa 3.
+   - Execute: `./report-progress.sh promocao agente-execucao resumo-promocao completed 2 2 "Resumo da promoção distribuído"`
 
 5. **Distribuir confirmação de publicação (condicional)**
-   - Execute: `./report-progress.sh promocao agente-execucao confirmacao-publicacao running 5 6 "Distribuindo confirmação de publicação"`
+   - Execute: `./report-progress.sh promocao agente-execucao confirmacao-publicacao started 1 2 "Distribuindo confirmação de publicação"`
    - Verificar se `config.contatos.marketing` existe e tem ao menos um item válido (não placeholder). Se **não** existir ou estiver vazio: pular esta etapa silenciosamente, registrando no log do agente "marketing não configurado, etapa pulada — não é erro". Considerar a etapa como **completed** mesmo assim.
    - Se houver destinatários, invocar `skill-distribuicao` (sem PDF, só texto) com:
      - `conteudo`: `{ tipo: "confirmacao-publicacao", titulo: "Promoção publicada", corpo: <texto com produtos promovidos, link da publicação no Instagram, data/hora> }`
@@ -101,11 +106,13 @@ Não emita `report-progress` para esta leitura — é bootstrap do agente, não 
      - `arquivo_pdf`: ausente
      - `webhook_url`: `config.whatsapp.url_distribuicao`
    - Esta etapa é considerada **completed** independente de ter enviado ou pulado por ausência de destinatário. Pulo por config ausente não é erro — é decisão operacional da loja.
+   - Execute: `./report-progress.sh promocao agente-execucao confirmacao-publicacao completed 2 2 "Confirmação de publicação distribuída"`
 
 6. **Consolidar e gravar status final**
-   - Execute: `./report-progress.sh promocao agente-execucao consolidacao completed 6 6 "Distribuição concluída"`
+   - Execute: `./report-progress.sh promocao agente-execucao consolidacao started 1 2 "Consolidando status final"`
    - Montar registro consolidado em JSON com:
      - Markdown e PDF gerados de cada relatório (paths)
      - Resultado de cada chamada de `skill-distribuicao` (modo: webhook ou local, sucesso/erro)
      - Pendências (se algo falhou e está em fallback ou erro)
    - Gravar em `promocao/outputs/{YYYY-MM-DD}_execucao-loja.json`
+   - Execute: `./report-progress.sh promocao agente-execucao consolidacao completed 2 2 "Distribuição concluída"`
