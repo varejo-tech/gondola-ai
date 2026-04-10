@@ -80,6 +80,11 @@
       animation: none;
     }
 
+    .topbar-logo .beacon.idle {
+      background: var(--yellow);
+      box-shadow: 0 0 8px rgba(234, 179, 8, 0.5);
+    }
+
     @keyframes pulse-beacon {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.4; }
@@ -310,6 +315,25 @@
       font-size: 13px;
       font-weight: 600;
       color: var(--text-dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .agent-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .task-status-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .task-status-icon {
+      font-size: 13px;
+      line-height: 1;
     }
 
     .agent-message {
@@ -544,6 +568,20 @@
       return 'green';
     }
 
+    function getStatusIcon(status) {
+      const icons = {
+        completed: '\u2705',   // ✅
+        error: '\u274C',       // ❌
+        waiting: '\u23F8\uFE0F', // ⏸️
+        running: '\u{1F535}',  // 🔵
+        started: '\u{1F535}',  // 🔵
+        active: '\u{1F535}',   // 🔵
+        disabled: '\u26AB',    // ⚫
+        idle: '\u26AA',        // ⚪
+      };
+      return icons[status] || '\u26AA';
+    }
+
     function countAgents(proc) {
       return Object.keys(proc.agents || {}).length;
     }
@@ -592,10 +630,13 @@
         ).length;
       }, 0);
 
+      const hasActiveProcess = Object.values(state.processes || {}).some(p => p.status === 'active');
+      const beaconClass = !connected ? 'offline' : (hasActiveProcess ? '' : 'idle');
+
       return (
         <div className="topbar">
           <div className="topbar-logo">
-            <div className={`beacon ${connected ? '' : 'offline'}`}></div>
+            <div className={`beacon ${beaconClass}`}></div>
             <h1>gondola.ai - Algoritmo da Gôndola</h1>
           </div>
           <div className="topbar-stats">
@@ -669,7 +710,10 @@
       return (
         <div className={`agent-card status-${agent.status} animate-in`}>
           <div className="agent-card-header card-badge">
-            <span className="agent-name">{name}</span>
+            <span className="agent-name">
+              <span className="agent-icon" role="img" aria-label="agente">{'\u{1F916}'}</span>
+              {name}
+            </span>
             <Badge status={agent.status} onCard />
           </div>
           <div className="agent-message">{message || '—'}</div>
@@ -759,7 +803,12 @@
                       <tr key={`${row.agentName}-${row.taskName}`} className="animate-in" style={{animationDelay: `${i * 30}ms`}}>
                         <td><span className="task-agent-name">{row.agentName}</span></td>
                         <td>{row.taskName}</td>
-                        <td><span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span></td>
+                        <td>
+                          <span className="task-status-cell">
+                            <span className="task-status-icon" role="img" aria-label={row.status}>{getStatusIcon(row.status)}</span>
+                            <span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span>
+                          </span>
+                        </td>
                         <td>{row.message || '—'}</td>
                         <td className="task-progress-cell">
                           <div className="task-progress-bar">
