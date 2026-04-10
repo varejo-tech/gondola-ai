@@ -191,6 +191,21 @@ modo_dev() {
 
 Em modo dev, a ausência do `.mcp.json` faz o `claude` subir sem nenhum MCP server — comportamento idêntico ao atual.
 
+O template `mcp.orquestrador.json` registra o bridge sob a chave `gondola-chat`:
+
+```json
+{
+  "mcpServers": {
+    "gondola-chat": {
+      "command": "node",
+      "args": [".mission-control/channel/server.mjs"]
+    }
+  }
+}
+```
+
+Essa chave é o que o flag `claude --dangerously-load-development-channels server:gondola-chat` referencia — o `server:` prefixa o nome registrado no `.mcp.json`.
+
 ### 4.5 Disciplina do mirror — `CLAUDE.orquestrador.md`
 
 Nova seção. Texto base:
