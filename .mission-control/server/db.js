@@ -1,6 +1,7 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
+const { discoverProcesses } = require('./discovery');
 
 const DB_DIR = path.join(__dirname, '..', 'db');
 const DB_PATH = path.join(DB_DIR, 'events.db');
@@ -53,7 +54,12 @@ function getAllEvents() {
 
 function getState() {
   const events = getAllEvents();
-  const state = { processes: {}, hooks: [], session_id: null, event_count: events.length };
+  const state = {
+    processes: discoverProcesses(),
+    hooks: [],
+    session_id: null,
+    event_count: events.length,
+  };
 
   for (const evt of events) {
     if (evt.session_id) state.session_id = evt.session_id;
@@ -72,6 +78,7 @@ function getState() {
         state.processes[evt.process] = { status: 'active', agents: {} };
       }
       const proc = state.processes[evt.process];
+      if (proc.status === 'idle') proc.status = 'active';
       if (evt.agent) {
         if (!proc.agents[evt.agent]) {
           proc.agents[evt.agent] = { status: 'running', tasks: {} };

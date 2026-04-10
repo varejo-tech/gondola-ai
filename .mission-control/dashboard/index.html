@@ -803,7 +803,12 @@
             if (!next.processes[evt.process]) {
               next.processes[evt.process] = { status: 'active', agents: {} };
             }
-            const proc = { ...next.processes[evt.process], agents: { ...next.processes[evt.process].agents } };
+            const existing = next.processes[evt.process];
+            const proc = {
+              ...existing,
+              status: existing.status === 'idle' ? 'active' : existing.status,
+              agents: { ...existing.agents }
+            };
             next.processes[evt.process] = proc;
 
             if (evt.agent) {
