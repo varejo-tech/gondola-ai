@@ -1,0 +1,25 @@
+<!--
+  Template estrutural genérico para o pdf-renderer.
+  Domain-agnostic: não menciona conceito de domínio nenhum.
+
+  As tags <header> e <footer> abaixo são extraídas pelo render.mjs e
+  injetadas como headerTemplate/footerTemplate do md-to-pdf (que internamente
+  vão para as opções correspondentes do Puppeteer).
+
+  Variáveis no formato {{nome}} são substituídas em tempo de geração com base
+  no objeto `variables` recebido pelo render.mjs.
+-->
+
+<header>
+  <div class="report-header">
+    <span class="report-header-title">{{titulo_curto}}</span>
+    <span class="report-header-meta">{{loja}}</span>
+  </div>
+</header>
+
+<footer>
+  <div class="report-footer">
+    <span class="report-footer-meta">{{processo}} • {{data}}</span>
+    <span class="report-footer-page">Página <span class="pageNumber"></span> de <span class="totalPages"></span></span>
+  </div>
+</footer>
