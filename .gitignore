@@ -22,3 +22,7 @@ Thumbs.db
 
 # Config de fontes de dados por processo (credenciais locais)
 **/config.json
+
+# Skills compartilhadas — node_modules locais por ferramenta
+.skills/_lib/*/node_modules/
+.skills/_lib/*/test/output/
