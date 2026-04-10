@@ -1,0 +1,15 @@
+{
+  "name": "pdf-renderer",
+  "version": "1.0.0",
+  "description": "Markdown to PDF rendering for the gondola.ai framework. Domain-agnostic shared skill runtime.",
+  "type": "module",
+  "private": true,
+  "main": "render.mjs",
+  "scripts": {
+    "render": "node render.mjs",
+    "smoke": "bash test/run-smoke.sh"
+  },
+  "dependencies": {
+    "md-to-pdf": "^5.2.4"
+  }
+}
