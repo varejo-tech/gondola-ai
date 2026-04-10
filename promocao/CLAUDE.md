@@ -34,6 +34,13 @@ O dataset `instagram` requer configurações que o usuário deve preencher antes
 
 **Estas configurações são solicitadas pelo Orquestrador ao configurar o processo de promoção.** O processo não deve ser executado sem que estejam preenchidas.
 
+#### Texto guia para o Orquestrador apresentar ao lojista
+
+- **`instagram_business_id`** — "Preciso do ID do seu Instagram Business — é o número que identifica sua conta profissional do Instagram dentro da Meta. Sua conta precisa ser do tipo Business e estar vinculada a uma Business Manager. Você encontra esse ID nas configurações da sua conta Business no Meta Business Suite."
+- **`access_token`** — "Preciso do token de acesso do System User da sua Business Manager. É o código que autoriza o acesso à API da Meta. Você pode gerá-lo no painel de desenvolvedores da Meta (Business Settings → System Users). O token precisa ter as permissões: instagram_basic, business_management e pages_read_engagement."
+- **`perfis_concorrentes`** — "Quais são os perfis de Instagram dos seus concorrentes que você quer monitorar? Pode me passar o nome de usuário (ex.: fortatacadista) ou o link do perfil. Pode listar quantos quiser." Importante: se ficar vazio ou com `["PREENCHER"]`, a pesquisa de concorrentes não roda — avise o lojista antes de prosseguir.
+- **`perfil_publicacao`** — "Qual é o perfil do Instagram da sua loja onde serão publicadas as peças promocionais?"
+
 ### Assets visuais (opcionais, recomendados)
 
 A seção `assets_visuais` do config.json permite ao usuário fornecer materiais visuais que melhoram significativamente a qualidade das peças geradas. São opcionais — sem eles a geração funciona apenas com prompt de texto.
@@ -45,6 +52,28 @@ A seção `assets_visuais` do config.json permite ao usuário fornecer materiais
 | `fotos_produtos` | Diretório contendo fotos dos produtos (nomeadas pelo código ou descrição) | `/caminho/para/fotos/` |
 
 **Estas configurações são oferecidas pelo Orquestrador durante a configuração do processo.** O usuário pode pular e configurar depois.
+
+#### Texto guia para o Orquestrador apresentar ao lojista
+
+Apresente como melhoria da qualidade do resultado, não como obrigação. Se o lojista não tiver agora, diga que pode configurar depois a qualquer momento.
+
+- **`assets_visuais.logo`** — "Você tem o logo da sua loja em arquivo digital (PNG ou JPG)? Se me passar o caminho do arquivo, vou incluir automaticamente nas peças promocionais."
+- **`assets_visuais.templates`** — "Você tem encartes ou posts anteriores da loja que gostaria de usar como referência de estilo? Pode ser um encarte impresso escaneado, um post antigo do Instagram ou qualquer material visual da loja. Será usado como base para manter a identidade visual."
+- **`assets_visuais.fotos_produtos`** — "Você tem uma pasta com fotos dos seus produtos? Se tiver, posso usar as fotos reais em vez de gerar imagens genéricas. Fica muito mais profissional."
+
+### Configuração do WhatsApp
+
+O envio de mensagens WhatsApp é feito via webhook do n8n. Apenas a URL do webhook é necessária.
+
+| Parâmetro | Descrição |
+|---|---|
+| `whatsapp.url_distribuicao` | URL do webhook do n8n configurado para distribuição de relatórios da promoção. |
+
+Sem essa URL, a Fase 3 (distribuição de relatórios via WhatsApp) não funciona. O processo continua até a publicação, mas a distribuição é afetada.
+
+#### Texto guia para o Orquestrador apresentar ao lojista
+
+- **`whatsapp.url_distribuicao`** — "Preciso da URL do webhook do n8n que você criou para enviar as mensagens de WhatsApp. É o endereço que aparece no nó de Webhook do seu workflow (algo como https://seu-n8n.com/webhook/distribuicao-promocao)."
 
 ### Template do config.json
 
