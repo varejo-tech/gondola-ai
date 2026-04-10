@@ -45,7 +45,7 @@ Use `/processos` para ver detalhes atualizados.
 
 Lista todos os processos disponíveis no framework. Mostra nome, descrição, modo de execução e dependências de cada processo.
 
-**Implementação:** Listar subpastas na raiz do repositório, excluindo `.dev/`, `.mission-control/`, `.claude/` e arquivos avulsos. Para cada subpasta encontrada, ler seu `CLAUDE.md` e extrair os campos `descricao`, `modo` e `dependencias`.
+**Implementação:** Listar subpastas na raiz do repositório, excluindo `.dev/`, `.mission-control/`, `.claude/`, `.skills/` e arquivos avulsos. Para cada subpasta encontrada, ler seu `CLAUDE.md` e extrair os campos `descricao`, `modo` e `dependencias`.
 
 Se nenhum processo for encontrado, informar: "Nenhum processo instalado. Consulte o administrador do framework."
 
