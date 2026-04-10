@@ -83,7 +83,7 @@ Ver `config.json` na raiz do processo para o formato esperado.
 
 - agente-analista: Analisa dados internos e externos para identificar oportunidades de promoção. Entrega lista curada de produtos recomendados.
 - agente-criativo: Produz materiais de comunicação (briefing, peças visuais) e publica nos canais da loja.
-- agente-execucao: Garante execução no chão de loja e distribui relatórios via WhatsApp.
+- agente-execucao: Garante a comunicação dos resultados — gera relatório de concorrentes e resumo da promoção em PDF, distribui via WhatsApp aos públicos certos (com fallback local), e envia confirmação de publicação para marketing.
 
 ## Fluxo de execução
 
@@ -91,4 +91,5 @@ Ver `config.json` na raiz do processo para o formato esperado.
    - Checkpoint (modo híbrido): Apresenta lista de produtos recomendados para validação do usuário antes de prosseguir.
 2. **Fase 2 — Multiplicar** — agente-criativo recebe o output do analista, gera briefing, produz peça visual e publica no Instagram. Grava registro em `outputs/`.
    - Checkpoint (modo híbrido): Apresenta briefing e peça gerada para aprovação antes de publicar.
-3. **Fase 3 — Coordenar** — agente-execucao dispara checklist de execução em loja e distribui relatórios. Grava status em `outputs/`.
+3. **Fase 3 — Coordenar** — agente-execucao consolida resultados, gera dois relatórios em PDF (relatório de concorrentes para a equipe comercial; resumo da promoção para os gerentes) e distribui via WhatsApp através de webhook n8n. Quando o webhook não estiver configurado, abre os PDFs localmente como fallback (a etapa segue como sucesso, não erro). Distribui também a confirmação de publicação (texto) para a equipe de marketing. Grava status consolidado em `outputs/`.
+   - Checkpoint (modo híbrido): nenhum — a Fase 3 é integralmente automática.
