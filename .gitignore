@@ -1,37 +1,27 @@
-# Symlinks locais — não versionar
-/CLAUDE.md
+# Arquivos locais — gerados pelo bootstrap, não versionar
+CLAUDE.md
+memory.op.md
+.claude/settings.json
+.claude/settings.local.json
+.claude/memory.md
 
-# Git worktrees locais — isolamento de trabalho
-.worktrees/
-
-# Infraestrutura de desenvolvimento — não distribuir ao cliente
+# Infraestrutura de desenvolvimento (clonada separadamente)
 .dev/
 
-# Memória de operação local
-memory.op.md
+# Git worktrees locais
+.worktrees/
 
-# Outputs de teste
-.dev/test-outputs/
-
-# Outputs de execução de processos (artefatos runtime)
-*/outputs/*
-!*/outputs/.gitkeep
-
-# Mission Control — artefatos de runtime local
+# Mission Control runtime
 .mission-control/db/
 .mission-control/pid
 .mission-control/port
 
-# Dependências
+# Outputs de processos
+**/outputs/
+
+# Node
 node_modules/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Config de fontes de dados por processo (credenciais locais)
-**/config.json
-
-# Skills compartilhadas — node_modules locais por ferramenta
-.skills/_lib/*/node_modules/
-.skills/_lib/*/test/output/
