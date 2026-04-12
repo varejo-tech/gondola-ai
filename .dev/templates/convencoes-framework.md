@@ -53,7 +53,8 @@ Todo plugin de processo deve conter esta estrutura:
 ```
 {nome-do-processo}/                    ← pasta no gondola-plugins-catalog/
 ├── .claude-plugin/
-│   └── plugin.json                    ← manifest obrigatório
+│   └── plugin.json                    ← manifest obrigatório (só campos do Claude Code)
+├── gondola.json                       ← metadados custom do framework (tipo, modo, deps)
 ├── processo.md                        ← definição do processo para o Orquestrador
 ├── commands/
 │   └── {nome-do-processo}.md          ← slash command que aciona o processo
@@ -73,31 +74,41 @@ Nenhuma subpasta adicional deve ser criada sem justificativa documentada.
 
 ## Padrão do `plugin.json`
 
+O schema do Claude Code é **estrito** — chaves desconhecidas causam erro de validação. Apenas campos reconhecidos:
+
 ```json
 {
   "name": "{nome-do-processo}",
   "description": "{descrição em uma frase}",
-  "version": "1.0.0",
-  "gondola": {
-    "tipo": "processo",
-    "modo": "auto | interativo | hibrido",
-    "framework_min": "1.0",
-    "dependencias": []
-  }
+  "version": "1.0.0"
 }
 ```
-
-**Campos obrigatórios:**
 
 | Campo | Descrição |
 |---|---|
 | `name` | Nome do plugin — deve ser igual ao nome da pasta e ao nome do slash command |
 | `description` | Uma frase descrevendo o propósito |
 | `version` | Semver |
-| `gondola.tipo` | Sempre `"processo"` para plugins-processo |
-| `gondola.modo` | `"auto"`, `"interativo"` ou `"hibrido"` |
-| `gondola.framework_min` | Versão mínima do framework central compatível |
-| `gondola.dependencias` | Lista de nomes de plugins pré-requisito, ou `[]` |
+
+## Padrão do `gondola.json`
+
+Metadados custom do framework, na raiz do plugin (ao lado de `processo.md`). Separado do `plugin.json` para não conflitar com o schema do Claude Code:
+
+```json
+{
+  "tipo": "processo",
+  "modo": "auto | interativo | hibrido",
+  "framework_min": "1.0",
+  "dependencias": []
+}
+```
+
+| Campo | Descrição |
+|---|---|
+| `tipo` | Sempre `"processo"` para plugins-processo |
+| `modo` | `"auto"`, `"interativo"` ou `"hibrido"` |
+| `framework_min` | Versão mínima do framework central compatível |
+| `dependencias` | Lista de nomes de plugins pré-requisito, ou `[]` |
 
 ---
 

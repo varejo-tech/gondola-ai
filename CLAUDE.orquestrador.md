@@ -41,7 +41,7 @@ Use `/processos` para ver a lista atualizada dos processos instalados nesta máq
 
 ### Comando `/processos`
 
-A implementação vive em `.claude/commands/processos.md` e é acionada automaticamente quando o lojista digita o comando. Ela enumera plugins instalados em `~/.claude/plugins/cache/` e filtra pelos que declaram `gondola.tipo === "processo"` no manifest.
+A implementação vive em `.claude/commands/processos.md` e é acionada automaticamente quando o lojista digita o comando. Ela enumera plugins instalados em `~/.claude/plugins/cache/` e filtra pelos que declaram `tipo: "processo"` no `gondola.json` do plugin.
 
 Você não precisa reimplementar a lógica aqui — apenas saiba que existe e que é a fonte oficial de descoberta dinâmica de processos. Se o lojista perguntar "quais processos eu tenho?" em linguagem natural, responda usando os mesmos dados que esse comando retornaria.
 
@@ -82,7 +82,7 @@ Quando o lojista invoca um processo (ex.: `/promocao`), o slash command do plugi
 
 1. **Leia o processo** — Abra `${CLAUDE_PLUGIN_ROOT}/processo.md` do plugin invocado. Absorva o fluxo, os checkpoints declarados, os datasets requeridos e os contratos dos subagentes.
 2. **Configuração da loja** — Aplique o protocolo de *"Configuração de processos"*. O arquivo efetivo de config vive em `${CLAUDE_PLUGIN_DATA}/{nome-do-processo}/config.json`. Se não existir, copie de `${CLAUDE_PLUGIN_ROOT}/templates/config.template.json` e guie o lojista no preenchimento.
-3. **Dependências** — Aplique o protocolo de *"Dependências entre processos"*. As dependências declaradas ficam em `plugin.json > gondola.dependencias`.
+3. **Dependências** — Aplique o protocolo de *"Dependências entre processos"*. As dependências declaradas ficam em `gondola.json > dependencias`.
 4. **Marcar início no Mission Control** — Execute `./start-process.sh {nome-do-processo}` imediatamente antes de despachar o primeiro subagente. Isso emite um marcador de nova execução que zera o estado visual no dashboard. Obrigatório em toda execução.
 5. **Despacho dos subagentes** — Para cada subagente declarado no `processo.md`, na ordem descrita: despache via ferramenta `Task` com `background: true`, usando o identificador qualificado `{nome-do-plugin}:{nome-do-subagente}`. Siga o protocolo detalhado na seção *"Como despachar subagentes de plugin"* mais adiante. Os outputs gerados por um subagente ficam em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/` e são lidos pelo próximo subagente quando necessário.
 6. **Checkpoints** — Os subagentes sinalizam checkpoints retornando `status: "waiting-user-input"` com uma pergunta específica ao lojista. Ao receber isso, pause o fluxo, retraduza a pergunta no seu tom de voz, aguarde a resposta, interprete, e inclua a orientação resultante no input do próximo despacho.
@@ -203,7 +203,7 @@ Ao iniciar um processo, antes de despachar qualquer subagente:
 
 ## Dependências entre processos
 
-Alguns processos dependem de resultados de outros. As dependências declaradas ficam em `plugin.json > gondola.dependencias` do plugin. Antes de executar um processo:
+Alguns processos dependem de resultados de outros. As dependências declaradas ficam em `gondola.json > dependencias` do plugin. Antes de executar um processo:
 
 1. Verifique se os outputs dos processos requeridos existem em `${CLAUDE_PLUGIN_DATA}/{processo-dependência}/outputs/`.
 2. Se um output necessário não existe:

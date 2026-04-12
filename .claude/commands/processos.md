@@ -12,17 +12,21 @@ Você é o Orquestrador. O lojista acabou de pedir a lista de processos disponí
 ls ~/.claude/plugins/cache/ 2>/dev/null
 ```
 
-2. Para cada diretório encontrado, leia o arquivo `.claude-plugin/plugin.json` e verifique se `gondola.tipo === "processo"`. Use:
+2. Para cada plugin encontrado, leia `gondola.json` (metadados custom do framework) e `.claude-plugin/plugin.json` (manifest do Claude Code). Filtre por `tipo === "processo"`:
 
 ```bash
-for dir in ~/.claude/plugins/cache/*/; do
-  manifest="$dir/.claude-plugin/plugin.json"
-  if [ -f "$manifest" ]; then
-    tipo=$(jq -r '.gondola.tipo // ""' "$manifest" 2>/dev/null)
+for dir in ~/.claude/plugins/cache/*/*/; do
+  # Pega a versão mais recente (último diretório)
+  latest=$(ls -d "$dir"*/ 2>/dev/null | sort | tail -1)
+  [ -z "$latest" ] && continue
+  gondola="$latest/gondola.json"
+  manifest="$latest/.claude-plugin/plugin.json"
+  if [ -f "$gondola" ] && [ -f "$manifest" ]; then
+    tipo=$(jq -r '.tipo // ""' "$gondola" 2>/dev/null)
     if [ "$tipo" = "processo" ]; then
       nome=$(jq -r '.name' "$manifest")
       desc=$(jq -r '.description' "$manifest")
-      modo=$(jq -r '.gondola.modo // "desconhecido"' "$manifest")
+      modo=$(jq -r '.modo // "desconhecido"' "$gondola")
       echo "$nome | $modo | $desc"
     fi
   fi

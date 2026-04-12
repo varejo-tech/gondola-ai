@@ -113,7 +113,8 @@ Consulte os templates em `.dev/templates/` para detalhes:
 ```
 {nome-do-processo}/                    ← pasta no gondola-plugins-catalog/
 ├── .claude-plugin/
-│   └── plugin.json                    ← manifest obrigatório (gondola.tipo, gondola.modo, etc.)
+│   └── plugin.json                    ← manifest obrigatório (só campos do Claude Code)
+├── gondola.json                       ← metadados custom do framework (tipo, modo, deps)
 ├── processo.md                        ← definição do processo para o Orquestrador ler
 ├── commands/
 │   └── {nome-do-processo}.md          ← slash command que aciona o processo
@@ -141,20 +142,29 @@ ${CLAUDE_PLUGIN_DATA}/{nome-do-processo}/
 {
   "name": "{nome-do-processo}",
   "description": "{descrição em uma frase}",
-  "version": "1.0.0",
-  "gondola": {
-    "tipo": "processo",
-    "modo": "auto | interativo | hibrido",
-    "framework_min": "1.0",
-    "dependencias": []
-  }
+  "version": "1.0.0"
 }
 ```
 
-- `gondola.tipo: "processo"` — distingue plugins-processo de outros tipos futuros. Só esses aparecem em `/processos`.
-- `gondola.modo` — governa o default de interação com o lojista.
-- `gondola.framework_min` — versão mínima do framework central compatível.
-- `gondola.dependencias` — lista de nomes de plugins cujos outputs são pré-requisito.
+O schema do Claude Code é **estrito** — chaves desconhecidas causam erro de validação. Metadados custom do Gondola ficam em arquivo separado.
+
+### `gondola.json` — metadados do framework
+
+Arquivo na raiz do plugin (ao lado de `processo.md`):
+
+```json
+{
+  "tipo": "processo",
+  "modo": "auto | interativo | hibrido",
+  "framework_min": "1.0",
+  "dependencias": []
+}
+```
+
+- `tipo: "processo"` — distingue plugins-processo de outros tipos futuros. Só esses aparecem em `/processos`.
+- `modo` — governa o default de interação com o lojista.
+- `framework_min` — versão mínima do framework central compatível.
+- `dependencias` — lista de nomes de plugins cujos outputs são pré-requisito.
 
 ### Subagentes — frontmatter obrigatório
 

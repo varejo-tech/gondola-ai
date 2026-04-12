@@ -76,21 +76,30 @@ Fixtures ficam fora do diretório do plugin e não são copiadas em `/plugin ins
 
 ## Template: `plugin.json`
 
+O schema do Claude Code é **estrito** — chaves desconhecidas causam erro de validação. Só campos reconhecidos pelo Claude Code:
+
 ```json
 {
   "name": "{nome-do-processo}",
   "description": "{Descrição em uma frase do que o processo faz}",
-  "version": "1.0.0",
-  "gondola": {
-    "tipo": "processo",
-    "modo": "{auto | interativo | hibrido}",
-    "framework_min": "1.0",
-    "dependencias": []
-  }
+  "version": "1.0.0"
 }
 ```
 
-**Campos do namespace `gondola`:**
+## Template: `gondola.json`
+
+Metadados custom do framework, na raiz do plugin (ao lado de `processo.md`):
+
+```json
+{
+  "tipo": "processo",
+  "modo": "{auto | interativo | hibrido}",
+  "framework_min": "1.0",
+  "dependencias": []
+}
+```
+
+**Campos:**
 
 | Campo | Obrigatório | Valores |
 |---|---|---|
