@@ -14,6 +14,16 @@ function readPluginManifest(pluginDir) {
   }
 }
 
+function readGondolaManifest(pluginDir) {
+  const gondolaPath = path.join(pluginDir, 'gondola.json');
+  if (!fs.existsSync(gondolaPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(gondolaPath, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
 function parseAgentTasks(agentFilePath) {
   const tasks = {};
   let content;
@@ -61,37 +71,75 @@ function parseAgentTasks(agentFilePath) {
   return tasks;
 }
 
+/**
+ * Enumera diretórios de plugin instalados.
+ * Estrutura do cache: cache/{marketplace}/{plugin}/{version}/
+ * Retorna um array de paths absolutos para o diretório da versão mais recente de cada plugin.
+ */
+function enumeratePluginDirs() {
+  const dirs = [];
+  if (!fs.existsSync(PLUGIN_CACHE_ROOT)) return dirs;
+
+  let marketplaces;
+  try {
+    marketplaces = fs.readdirSync(PLUGIN_CACHE_ROOT, { withFileTypes: true });
+  } catch {
+    return dirs;
+  }
+
+  for (const mkt of marketplaces) {
+    if (!mkt.isDirectory()) continue;
+    const mktPath = path.join(PLUGIN_CACHE_ROOT, mkt.name);
+
+    let plugins;
+    try {
+      plugins = fs.readdirSync(mktPath, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const plug of plugins) {
+      if (!plug.isDirectory()) continue;
+      const plugPath = path.join(mktPath, plug.name);
+
+      let versions;
+      try {
+        versions = fs.readdirSync(plugPath, { withFileTypes: true })
+          .filter(v => v.isDirectory())
+          .map(v => v.name)
+          .sort();
+      } catch {
+        continue;
+      }
+
+      if (versions.length === 0) continue;
+      // Pega a última versão (sort lexicográfico, suficiente para semver simples)
+      dirs.push(path.join(plugPath, versions[versions.length - 1]));
+    }
+  }
+
+  return dirs;
+}
+
 function discoverProcesses() {
   const processes = {};
+  const pluginDirs = enumeratePluginDirs();
 
-  if (!fs.existsSync(PLUGIN_CACHE_ROOT)) {
-    return processes;
-  }
-
-  let pluginDirs;
-  try {
-    pluginDirs = fs.readdirSync(PLUGIN_CACHE_ROOT, { withFileTypes: true });
-  } catch {
-    return processes;
-  }
-
-  for (const entry of pluginDirs) {
-    if (!entry.isDirectory()) continue;
-
-    const pluginDir = path.join(PLUGIN_CACHE_ROOT, entry.name);
+  for (const pluginDir of pluginDirs) {
     const manifest = readPluginManifest(pluginDir);
     if (!manifest) continue;
-    if (!manifest.gondola || manifest.gondola.tipo !== 'processo') continue;
 
-    // Fallback para o nome do diretório se manifest.name estiver ausente ou inválido.
-    // Sem isso, processes[undefined] silenciosamente quebra o dashboard.
+    const gondola = readGondolaManifest(pluginDir);
+    if (!gondola || gondola.tipo !== 'processo') continue;
+
+    const dirName = path.basename(path.dirname(pluginDir)); // nome do plugin no cache
     const procName = typeof manifest.name === 'string' && manifest.name.length > 0
       ? manifest.name
-      : entry.name;
+      : dirName;
     const proc = {
       status: 'idle',
       installed: true,
-      modo: manifest.gondola.modo || null,
+      modo: gondola.modo || null,
       descricao: manifest.description || null,
       agents: {},
     };
@@ -110,7 +158,6 @@ function discoverProcesses() {
         const agentName = af.replace(/\.md$/, '');
         const tasks = parseAgentTasks(path.join(agentsDir, af));
 
-        // Status inicial do agente: disabled se TODAS as tarefas forem disabled, senão idle.
         const taskList = Object.values(tasks);
         const allDisabled = taskList.length > 0 && taskList.every(t => t.status === 'disabled');
 
