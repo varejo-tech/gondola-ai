@@ -83,7 +83,11 @@ function discoverProcesses() {
     if (!manifest) continue;
     if (!manifest.gondola || manifest.gondola.tipo !== 'processo') continue;
 
-    const procName = manifest.name;
+    // Fallback para o nome do diretório se manifest.name estiver ausente ou inválido.
+    // Sem isso, processes[undefined] silenciosamente quebra o dashboard.
+    const procName = typeof manifest.name === 'string' && manifest.name.length > 0
+      ? manifest.name
+      : entry.name;
     const proc = {
       status: 'idle',
       installed: true,
