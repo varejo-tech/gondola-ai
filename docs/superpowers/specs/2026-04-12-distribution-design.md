@@ -18,10 +18,10 @@ O ecossistema Gondola é composto por 4 repositórios no GitHub:
 
 | Repo | Visibilidade | Público-alvo | Conteúdo |
 |---|---|---|---|
-| `avanco/gondola-ai` | Público | Todos | Framework central: Orquestrador, Mission Control, scripts, CLAUDE.orquestrador.md, bootstrap |
-| `avanco/create-gondola` | Público (npm) | Todos | Pacote npm do instalador — baixa o framework, roda bootstrap, exibe instruções |
-| `avanco/gondola-marketplace` | Privado | Clientes Avanço | Marketplace limpo: `marketplace.json` + plugins publicados (sem fixtures, sem artefatos de dev) |
-| `avanco/gondola-dev-tools` | Privado | Devs Avanço | Pasta `.dev/`: modo.sh, settings dev/op, templates do contrato de plugin |
+| `varejo-tech/gondola-ai` | Público | Todos | Framework central: Orquestrador, Mission Control, scripts, CLAUDE.orquestrador.md, bootstrap |
+| `varejo-tech/create-gondola` | Público (npm) | Todos | Pacote npm do instalador — baixa o framework, roda bootstrap, exibe instruções |
+| `varejo-tech/gondola-marketplace` | Privado | Clientes Avanço | Marketplace limpo: `marketplace.json` + plugins publicados (sem fixtures, sem artefatos de dev) |
+| `varejo-tech/gondola-dev-tools` | Privado | Devs Avanço | Pasta `.dev/`: modo.sh, settings dev/op, templates do contrato de plugin |
 
 O ambiente local de desenvolvimento de plugins (`gondola-plugins-catalog`) continua existindo nas máquinas dos devs, mas não é publicado. Os plugins são copiados limpos para `gondola-marketplace` quando prontos para release.
 
@@ -43,7 +43,7 @@ npx create-gondola
 O instalador executa:
 
 1. Pergunta o nome da pasta (default: `gondola-ai`)
-2. Baixa o release mais recente de `avanco/gondola-ai` via GitHub API (não exige git)
+2. Baixa o release mais recente de `varejo-tech/gondola-ai` via GitHub API (não exige git)
 3. Extrai os arquivos, excluindo: `.git/`, `.dev/`, `.github/`
 4. Roda `bootstrap.sh` — cria arquivos locais (memória, settings locais, `.gitignore`)
 5. Remove `bootstrap.sh` (já cumpriu sua função)
@@ -59,7 +59,7 @@ O lojista abre Claude Code na pasta do framework. O Orquestrador detecta que nã
 
 Se o lojista pedir ajuda, o Orquestrador guia:
 
-1. Registro do marketplace: `/plugin marketplace add avanco/gondola-marketplace`
+1. Registro do marketplace: `/plugin marketplace add varejo-tech/gondola-marketplace`
 2. Visualização dos plugins disponíveis: `/plugin`
 3. Instalação de plugins: `/plugin install nome-do-plugin`
 
@@ -89,9 +89,9 @@ Todos respeitam a mesma regra: atualizam arquivos do framework, nunca tocam em a
 ### 3.2 Setup inicial
 
 ```bash
-git clone avanco/gondola-ai
+git clone varejo-tech/gondola-ai
 cd gondola-ai
-git clone avanco/gondola-dev-tools .dev
+git clone varejo-tech/gondola-dev-tools .dev
 ./bootstrap.sh
 .dev/modo.sh dev
 ```
@@ -102,7 +102,7 @@ Resultado: framework completo com histórico git, pasta `.dev/` com modo dev/op,
 
 ```bash
 cd ~/projetos
-git clone avanco/gondola-marketplace
+git clone varejo-tech/gondola-marketplace
 ```
 
 Para testar um plugin em desenvolvimento localmente:
@@ -191,7 +191,7 @@ Slash command do Claude Code em `.claude/commands/gondola-update.md`.
 ### 6.2 Comportamento
 
 1. Lê `version.json` na raiz do framework para obter versão atual
-2. Consulta versão mais recente em `avanco/gondola-ai` (GitHub releases API)
+2. Consulta versão mais recente em `varejo-tech/gondola-ai` (GitHub releases API)
 3. Se há atualização:
    - Baixa os arquivos atualizados
    - Substitui arquivos do framework (scripts, CLAUDE.orquestrador.md, Mission Control)
@@ -203,7 +203,7 @@ Slash command do Claude Code em `.claude/commands/gondola-update.md`.
 ### 6.3 Requer
 
 - `version.json` na raiz do framework com campo `version` (semver)
-- GitHub releases no repo `avanco/gondola-ai` para marcar versões
+- GitHub releases no repo `varejo-tech/gondola-ai` para marcar versões
 
 ### 6.4 O que NÃO faz
 
@@ -231,7 +231,7 @@ Texto definido na Seção 2.3 deste documento.
 
 Se o lojista pedir ajuda, o Orquestrador orienta passo a passo:
 
-1. Registro do marketplace: `/plugin marketplace add avanco/gondola-marketplace`
+1. Registro do marketplace: `/plugin marketplace add varejo-tech/gondola-marketplace`
 2. Visualização: `/plugin`
 3. Instalação: `/plugin install nome-do-plugin`
 

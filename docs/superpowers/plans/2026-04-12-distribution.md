@@ -25,7 +25,7 @@ The framework needs version tracking for `/gondola update` to work.
 {
   "version": "1.0.0",
   "name": "gondola-ai",
-  "repository": "avanco/gondola-ai"
+  "repository": "varejo-tech/gondola-ai"
 }
 ```
 
@@ -174,7 +174,7 @@ echo "Próximo passo: abra o Claude Code nesta pasta."
 echo "  cd $(pwd) && claude"
 echo ""
 echo "Para conectar ao marketplace de plugins da Avanço:"
-echo "  /plugin marketplace add avanco/gondola-marketplace"
+echo "  /plugin marketplace add varejo-tech/gondola-marketplace"
 ```
 
 - [ ] **Step 3: Verify the script runs without errors**
@@ -216,7 +216,7 @@ Quando `/processos` retorna lista vazia (nenhum plugin de tipo "processo" instal
 
 **Se o lojista pedir ajuda**, guie passo a passo:
 
-1. **Registrar o marketplace**: peça ao lojista para digitar `/plugin marketplace add avanco/gondola-marketplace`. Explique que isso conecta ao catálogo oficial de plugins da Avanço. Se falhar por falta de acesso, oriente o lojista a entrar em contato com a Avanço para obter as credenciais.
+1. **Registrar o marketplace**: peça ao lojista para digitar `/plugin marketplace add varejo-tech/gondola-marketplace`. Explique que isso conecta ao catálogo oficial de plugins da Avanço. Se falhar por falta de acesso, oriente o lojista a entrar em contato com a Avanço para obter as credenciais.
 2. **Visualizar plugins disponíveis**: peça para digitar `/plugin`. Isso abre a interface de plugins onde ele pode ver o que está disponível.
 3. **Instalar um plugin**: oriente a usar `/plugin install nome-do-plugin` para instalar o plugin desejado.
 
@@ -229,7 +229,7 @@ In the existing "Processos disponíveis" section (line 41), replace the referenc
 
 Old: `Plugins oficiais da Avanço são instalados a partir do catálogo `gondola-plugins-catalog` via `/plugin marketplace add` + `/plugin install`.`
 
-New: `Plugins oficiais da Avanço são instalados a partir do marketplace `gondola-marketplace` via `/plugin marketplace add avanco/gondola-marketplace` + `/plugin install`.`
+New: `Plugins oficiais da Avanço são instalados a partir do marketplace `gondola-marketplace` via `/plugin marketplace add varejo-tech/gondola-marketplace` + `/plugin install`.`
 
 - [ ] **Step 3: Commit**
 
@@ -264,7 +264,7 @@ Você é o assistente de atualização do framework Gondola AI.
 2. Consulte a versão mais recente disponível no GitHub:
 
 ```bash
-curl -s https://api.github.com/repos/avanco/gondola-ai/releases/latest | node -e "
+curl -s https://api.github.com/repos/varejo-tech/gondola-ai/releases/latest | node -e "
 const chunks = [];
 process.stdin.on('data', c => chunks.push(c));
 process.stdin.on('end', () => {
@@ -419,7 +419,7 @@ Para instalar plugins de automação, você precisa se conectar ao marketplace o
 **1. Registre o marketplace:**
 
 ```
-/plugin marketplace add avanco/gondola-marketplace
+/plugin marketplace add varejo-tech/gondola-marketplace
 ```
 
 **2. Veja os plugins disponíveis:**
@@ -456,14 +456,14 @@ Para atualizar plugins individualmente:
 
 ## Para desenvolvedores
 
-Se você é desenvolvedor da Avanço Informática e quer contribuir com o framework ou criar novos plugins, consulte o repositório [gondola-dev-tools](https://github.com/avanco/gondola-dev-tools) para instruções de setup do ambiente de desenvolvimento.
+Se você é desenvolvedor da Avanço Informática e quer contribuir com o framework ou criar novos plugins, consulte o repositório [gondola-dev-tools](https://github.com/varejo-tech/gondola-dev-tools) para instruções de setup do ambiente de desenvolvimento.
 
 O setup rápido:
 
 ```bash
-git clone https://github.com/avanco/gondola-ai.git
+git clone https://github.com/varejo-tech/gondola-ai.git
 cd gondola-ai
-git clone https://github.com/avanco/gondola-dev-tools.git .dev
+git clone https://github.com/varejo-tech/gondola-dev-tools.git .dev
 ./bootstrap.sh
 .dev/modo.sh dev
 ```
@@ -727,7 +727,7 @@ O instalador baixa o framework Gondola AI, configura o ambiente e prepara tudo p
 
 ## O que é a Gondola AI
 
-A Gondola AI é um framework que transforma o Claude Code em um assistente operacional para supermercados. Mais informações em [gondola-ai](https://github.com/avanco/gondola-ai).
+A Gondola AI é um framework que transforma o Claude Code em um assistente operacional para supermercados. Mais informações em [gondola-ai](https://github.com/varejo-tech/gondola-ai).
 
 ## Licença
 
@@ -805,7 +805,7 @@ Catálogo oficial de plugins para o framework **Gondola AI** da Avanço Informá
 Este marketplace é acessível apenas para clientes da Avanço Informática. Para conectar:
 
 ```
-/plugin marketplace add avanco/gondola-marketplace
+/plugin marketplace add varejo-tech/gondola-marketplace
 ```
 
 Para instalar um plugin:
@@ -822,7 +822,7 @@ Para atualizar plugins instalados:
 
 ## Para desenvolvedores
 
-Consulte o repositório [gondola-dev-tools](https://github.com/avanco/gondola-dev-tools) para instruções de como desenvolver e publicar plugins neste marketplace.
+Consulte o repositório [gondola-dev-tools](https://github.com/varejo-tech/gondola-dev-tools) para instruções de como desenvolver e publicar plugins neste marketplace.
 
 ## Plugins disponíveis
 
@@ -880,9 +880,9 @@ Ferramentas de desenvolvimento para o framework **Gondola AI** — uso exclusivo
 Clone este repositório dentro da pasta `.dev/` do framework:
 
 ```bash
-git clone https://github.com/avanco/gondola-ai.git
+git clone https://github.com/varejo-tech/gondola-ai.git
 cd gondola-ai
-git clone https://github.com/avanco/gondola-dev-tools.git .dev
+git clone https://github.com/varejo-tech/gondola-dev-tools.git .dev
 ./bootstrap.sh
 .dev/modo.sh dev
 ```
