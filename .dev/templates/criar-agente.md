@@ -69,7 +69,7 @@ No body, mencionar as skills que o subagente invoca via `Skill("{plugin}:{skill}
 
 ```markdown
 ---
-name: {plugin-name}-{papel}-{segmento}
+name: {papel}-{segmento}
 description: {Uma frase descrevendo o que este subagente faz e quando é despachado. Ex: "Identifica oportunidades promocionais cruzando estoque e vendas. Retorna lista candidata aguardando validação do lojista."}
 model: sonnet
 tools: Read, Grep, Glob, Bash, Skill, Write
@@ -129,7 +129,7 @@ Retorne **exatamente** este objeto JSON como sua resposta final. Sem texto adici
 ## Regras
 
 1. **Frontmatter obrigatório** — Sem frontmatter YAML, o arquivo não é reconhecido como subagente pelo Claude Code.
-2. **`name` = stem do filename** — `name: plugin-papel-segmento` deve corresponder exatamente ao nome do arquivo `papel-segmento.md` com prefixo do plugin.
+2. **`name` = stem do filename, sem prefixo do plugin** — `name: papel-segmento` deve corresponder exatamente ao nome do arquivo `papel-segmento.md`. O Claude Code resolve o namespace `{plugin}:{name}` automaticamente; incluir o prefixo no name causaria duplicação.
 3. **Contexto isolado** — Cada invocação recebe contexto fresco. O subagente não "lembra" de invocações anteriores. A única bridge entre subagentes é o filesystem.
 4. **Contrato de retorno JSON** — Todo subagente deve retornar o objeto JSON estruturado. O Orquestrador depende desse contrato para narrar ao lojista e decidir o próximo passo.
 5. **Outputs em `${CLAUDE_PLUGIN_DATA}`** — Jamais gravar outputs dentro do diretório do plugin (`${CLAUDE_PLUGIN_ROOT}`). O estado da loja fica em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/`.

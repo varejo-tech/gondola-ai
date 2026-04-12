@@ -42,7 +42,7 @@ Todos os nomes de pastas, arquivos, subagentes e skills usam **kebab-case** (min
 | Subagente | `{plugin}:{subagent-name}` | `promocao:analista-oportunidades` |
 | Skill | `{plugin}:{skill-name}` | `promocao:oportunidade-promocional` |
 
-O `name` no frontmatter do subagente deve incluir o prefixo do plugin: `promocao-analista-oportunidades`. O slug após os dois pontos corresponde à parte após o prefixo do plugin.
+O `name` no frontmatter do subagente **não inclui** o prefixo do plugin — é apenas o stem do filename: `analista-oportunidades`. O Claude Code resolve o namespace via `{plugin}:{name}` automaticamente (ex.: `promocao:analista-oportunidades`). Se o name incluísse o prefixo, o resultado seria `promocao:promocao-analista-oportunidades` (duplicação).
 
 ---
 
@@ -120,7 +120,7 @@ Cada subagente é um arquivo `.md` em `{plugin}/agents/` com frontmatter YAML ob
 
 ```markdown
 ---
-name: {plugin-name}-{papel}-{segmento}
+name: {papel}-{segmento}
 description: {Uma frase descrevendo o que este subagente faz e quando é despachado.}
 model: sonnet
 tools: Read, Grep, Glob, Bash, Skill, Write
@@ -147,7 +147,7 @@ tools: Read, Grep, Glob, Bash, Skill, Write
 ### Regras de subagentes
 
 1. **Frontmatter obrigatório** — Sem frontmatter, o Claude Code não reconhece o arquivo como subagente.
-2. **`name` = stem do filename com prefixo do plugin** — `name: plugin-papel-segmento` corresponde a `agents/papel-segmento.md`.
+2. **`name` = stem do filename, sem prefixo do plugin** — `name: papel-segmento` corresponde a `agents/papel-segmento.md`. O Claude Code resolve o namespace via `{plugin}:{name}` automaticamente.
 3. **Contexto isolado** — Cada invocação recebe contexto fresco. A única bridge entre subagentes é o filesystem.
 4. **Contrato de retorno JSON** — Todo subagente retorna objeto JSON estruturado (ver campo `status`).
 5. **Sem `report-progress.sh`** — Hooks automáticos cuidam da telemetria no Mission Control.
