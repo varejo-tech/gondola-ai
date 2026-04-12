@@ -1,24 +1,26 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const PLUGIN_CACHE_ROOT = path.join(os.homedir(), '.claude', 'plugins', 'cache');
 
-const EXCLUDED_DIRS = new Set([
-  '.git', '.dev', '.skills', '.mission-control', '.claude',
-  'node_modules', 'docs',
-]);
-
-function readMetadata(claudeMdPath) {
+function readPluginManifest(pluginDir) {
+  const manifestPath = path.join(pluginDir, '.claude-plugin', 'plugin.json');
+  if (!fs.existsSync(manifestPath)) return null;
   try {
-    const md = fs.readFileSync(claudeMdPath, 'utf-8');
-    const metadata = {};
-    const modoMatch = md.match(/^modo:\s*(.+)$/m);
-    const descMatch = md.match(/^descricao:\s*(.+)$/m);
-    if (modoMatch) metadata.modo = modoMatch[1].trim();
-    if (descMatch) metadata.descricao = descMatch[1].trim();
-    return metadata;
+    return JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
   } catch {
-    return {};
+    return null;
+  }
+}
+
+function readGondolaManifest(pluginDir) {
+  const gondolaPath = path.join(pluginDir, 'gondola.json');
+  if (!fs.existsSync(gondolaPath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(gondolaPath, 'utf-8'));
+  } catch {
+    return null;
   }
 }
 
@@ -36,7 +38,7 @@ function parseAgentTasks(agentFilePath) {
 
   let m;
   while ((m = re.exec(content)) !== null) {
-    const [, , , taskName, status, step, total, msg] = m;
+    const [, , , taskName, status, step, total] = m;
     const totalSteps = parseInt(total, 10);
 
     if (!tasks[taskName]) {
@@ -69,41 +71,84 @@ function parseAgentTasks(agentFilePath) {
   return tasks;
 }
 
-function discoverProcesses() {
-  const processes = {};
+/**
+ * Enumera diretórios de plugin instalados.
+ * Estrutura do cache: cache/{marketplace}/{plugin}/{version}/
+ * Retorna um array de paths absolutos para o diretório da versão mais recente de cada plugin.
+ */
+function enumeratePluginDirs() {
+  const dirs = [];
+  if (!fs.existsSync(PLUGIN_CACHE_ROOT)) return dirs;
 
-  let entries;
+  let marketplaces;
   try {
-    entries = fs.readdirSync(ROOT, { withFileTypes: true });
+    marketplaces = fs.readdirSync(PLUGIN_CACHE_ROOT, { withFileTypes: true });
   } catch {
-    return processes;
+    return dirs;
   }
 
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith('.')) continue;
-    if (EXCLUDED_DIRS.has(entry.name)) continue;
+  for (const mkt of marketplaces) {
+    if (!mkt.isDirectory()) continue;
+    const mktPath = path.join(PLUGIN_CACHE_ROOT, mkt.name);
 
-    const procDir = path.join(ROOT, entry.name);
-    const claudeMd = path.join(procDir, 'CLAUDE.md');
-    if (!fs.existsSync(claudeMd)) continue;
+    let plugins;
+    try {
+      plugins = fs.readdirSync(mktPath, { withFileTypes: true });
+    } catch {
+      continue;
+    }
 
-    const procName = entry.name;
-    const metadata = readMetadata(claudeMd);
+    for (const plug of plugins) {
+      if (!plug.isDirectory()) continue;
+      const plugPath = path.join(mktPath, plug.name);
 
+      let versions;
+      try {
+        versions = fs.readdirSync(plugPath, { withFileTypes: true })
+          .filter(v => v.isDirectory())
+          .map(v => v.name)
+          .sort();
+      } catch {
+        continue;
+      }
+
+      if (versions.length === 0) continue;
+      // Pega a última versão (sort lexicográfico, suficiente para semver simples)
+      dirs.push(path.join(plugPath, versions[versions.length - 1]));
+    }
+  }
+
+  return dirs;
+}
+
+function discoverProcesses() {
+  const processes = {};
+  const pluginDirs = enumeratePluginDirs();
+
+  for (const pluginDir of pluginDirs) {
+    const manifest = readPluginManifest(pluginDir);
+    if (!manifest) continue;
+
+    const gondola = readGondolaManifest(pluginDir);
+    if (!gondola || gondola.tipo !== 'processo') continue;
+
+    const dirName = path.basename(path.dirname(pluginDir)); // nome do plugin no cache
+    const procName = typeof manifest.name === 'string' && manifest.name.length > 0
+      ? manifest.name
+      : dirName;
     const proc = {
       status: 'idle',
       installed: true,
-      modo: metadata.modo || null,
-      descricao: metadata.descricao || null,
+      modo: gondola.modo || null,
+      descricao: manifest.description || null,
       agents: {},
     };
 
-    const agentsDir = path.join(procDir, 'agents');
+    const agentsDir = path.join(pluginDir, 'agents');
     if (fs.existsSync(agentsDir)) {
       let agentFiles;
       try {
-        agentFiles = fs.readdirSync(agentsDir).filter(f => f.startsWith('agente-') && f.endsWith('.md'));
+        agentFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md'));
       } catch {
         agentFiles = [];
       }
@@ -113,7 +158,6 @@ function discoverProcesses() {
         const agentName = af.replace(/\.md$/, '');
         const tasks = parseAgentTasks(path.join(agentsDir, af));
 
-        // Status inicial do agente: disabled se TODAS as tarefas forem disabled, senão idle.
         const taskList = Object.values(tasks);
         const allDisabled = taskList.length > 0 && taskList.every(t => t.status === 'disabled');
 
