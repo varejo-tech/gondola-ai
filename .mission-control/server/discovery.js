@@ -1,24 +1,16 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const PLUGIN_CACHE_ROOT = path.join(os.homedir(), '.claude', 'plugins', 'cache');
 
-const EXCLUDED_DIRS = new Set([
-  '.git', '.dev', '.skills', '.mission-control', '.claude',
-  'node_modules', 'docs',
-]);
-
-function readMetadata(claudeMdPath) {
+function readPluginManifest(pluginDir) {
+  const manifestPath = path.join(pluginDir, '.claude-plugin', 'plugin.json');
+  if (!fs.existsSync(manifestPath)) return null;
   try {
-    const md = fs.readFileSync(claudeMdPath, 'utf-8');
-    const metadata = {};
-    const modoMatch = md.match(/^modo:\s*(.+)$/m);
-    const descMatch = md.match(/^descricao:\s*(.+)$/m);
-    if (modoMatch) metadata.modo = modoMatch[1].trim();
-    if (descMatch) metadata.descricao = descMatch[1].trim();
-    return metadata;
+    return JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
   } catch {
-    return {};
+    return null;
   }
 }
 
@@ -36,7 +28,7 @@ function parseAgentTasks(agentFilePath) {
 
   let m;
   while ((m = re.exec(content)) !== null) {
-    const [, , , taskName, status, step, total, msg] = m;
+    const [, , , taskName, status, step, total] = m;
     const totalSteps = parseInt(total, 10);
 
     if (!tasks[taskName]) {
@@ -72,38 +64,39 @@ function parseAgentTasks(agentFilePath) {
 function discoverProcesses() {
   const processes = {};
 
-  let entries;
+  if (!fs.existsSync(PLUGIN_CACHE_ROOT)) {
+    return processes;
+  }
+
+  let pluginDirs;
   try {
-    entries = fs.readdirSync(ROOT, { withFileTypes: true });
+    pluginDirs = fs.readdirSync(PLUGIN_CACHE_ROOT, { withFileTypes: true });
   } catch {
     return processes;
   }
 
-  for (const entry of entries) {
+  for (const entry of pluginDirs) {
     if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith('.')) continue;
-    if (EXCLUDED_DIRS.has(entry.name)) continue;
 
-    const procDir = path.join(ROOT, entry.name);
-    const claudeMd = path.join(procDir, 'CLAUDE.md');
-    if (!fs.existsSync(claudeMd)) continue;
+    const pluginDir = path.join(PLUGIN_CACHE_ROOT, entry.name);
+    const manifest = readPluginManifest(pluginDir);
+    if (!manifest) continue;
+    if (!manifest.gondola || manifest.gondola.tipo !== 'processo') continue;
 
-    const procName = entry.name;
-    const metadata = readMetadata(claudeMd);
-
+    const procName = manifest.name;
     const proc = {
       status: 'idle',
       installed: true,
-      modo: metadata.modo || null,
-      descricao: metadata.descricao || null,
+      modo: manifest.gondola.modo || null,
+      descricao: manifest.description || null,
       agents: {},
     };
 
-    const agentsDir = path.join(procDir, 'agents');
+    const agentsDir = path.join(pluginDir, 'agents');
     if (fs.existsSync(agentsDir)) {
       let agentFiles;
       try {
-        agentFiles = fs.readdirSync(agentsDir).filter(f => f.startsWith('agente-') && f.endsWith('.md'));
+        agentFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md'));
       } catch {
         agentFiles = [];
       }
