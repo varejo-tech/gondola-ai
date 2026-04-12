@@ -219,6 +219,14 @@
     .badge-waiting { background: var(--yellow-soft); color: var(--yellow); }
     .badge-waiting .badge-dot { background: var(--yellow); animation: pulse-beacon 1.8s ease-in-out infinite; }
 
+    .badge-human { background: rgba(234, 179, 8, 0.2); color: #eab308; font-weight: 700; }
+    .badge-human .badge-dot { background: #eab308; animation: blink-human 0.8s ease-in-out infinite; }
+
+    @keyframes blink-human {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.7); }
+    }
+
     .badge-idle { background: rgba(148, 163, 184, 0.1); color: var(--text-white-dim); }
     .badge-idle .badge-dot { background: var(--text-white-dim); }
 
@@ -230,6 +238,7 @@
     .card-badge .badge-completed { background: var(--green-soft); color: #16a34a; }
     .card-badge .badge-error { background: var(--red-soft); color: var(--red); }
     .card-badge .badge-waiting { background: var(--yellow-soft); color: #a16207; }
+    .card-badge .badge-human { background: rgba(234, 179, 8, 0.2); color: #92400e; font-weight: 700; }
     .card-badge .badge-idle { background: #f1f5f9; color: var(--text-dark-muted); }
     .card-badge .badge-disabled { background: #f1f5f9; color: #94a3b8; }
 
@@ -474,6 +483,7 @@
     .status-text.disabled { color: #94a3b8; font-style: italic; }
     .status-text.error { color: var(--red); }
     .status-text.waiting { color: #a16207; }
+    .status-text.waiting-user-input { color: #92400e; font-weight: 700; }
 
     /* ─── Empty state ─── */
     .empty-state {
@@ -547,6 +557,7 @@
         case 'active': case 'started': case 'running': return 'badge-active';
         case 'completed': return 'badge-completed';
         case 'error': return 'badge-error';
+        case 'waiting-user-input': return 'badge-human';
         case 'waiting': return 'badge-waiting';
         case 'disabled': return 'badge-disabled';
         default: return 'badge-idle';
@@ -556,7 +567,9 @@
     function getStatusLabel(status) {
       const labels = {
         active: 'ATIVO', started: 'INICIADO', running: 'EXECUTANDO',
-        completed: 'CONCLUÍDO', error: 'ERRO', waiting: 'AGUARDANDO',
+        completed: 'CONCLU\u00cdDO', error: 'ERRO',
+        'waiting-user-input': 'HUMANO SOLICITADO',
+        waiting: 'AGUARDANDO',
         disabled: 'DESATIVADO', idle: 'OCIOSO'
       };
       return labels[status] || status?.toUpperCase() || 'OCIOSO';
@@ -572,6 +585,7 @@
       const icons = {
         completed: '\u2705',   // ✅
         error: '\u274C',       // ❌
+        'waiting-user-input': '\u{1F7E1}', // 🟡
         waiting: '\u23F8\uFE0F', // ⏸️
         running: '\u{1F535}',  // 🔵
         started: '\u{1F535}',  // 🔵
@@ -615,15 +629,7 @@
     }
 
     // ─── TopBar ───
-    function TopBar({ state, connected, sessionStart }) {
-      const [elapsed, setElapsed] = useState(0);
-
-      useEffect(() => {
-        if (!sessionStart) return;
-        const iv = setInterval(() => setElapsed(Date.now() - sessionStart), 1000);
-        return () => clearInterval(iv);
-      }, [sessionStart]);
-
+    function TopBar({ state, connected }) {
       const activeAgents = Object.values(state.processes || {}).reduce((sum, p) => {
         return sum + Object.values(p.agents || {}).filter(a =>
           a.status === 'running' || a.status === 'started'
@@ -641,23 +647,32 @@
           </div>
           <div className="topbar-stats">
             <div className="stat">
-              <span className="stat-label">Sessão</span>
-              <span className="stat-value">{state.session_id ? state.session_id.substring(0, 12) : '—'}</span>
-            </div>
-            <div className="stat">
               <span className="stat-label">Agentes Ativos</span>
               <span className="stat-value">{activeAgents}</span>
             </div>
-            <div className="stat">
-              <span className="stat-label">Eventos</span>
-              <span className="stat-value">{state.event_count || 0}</span>
-            </div>
-            <div className="stat">
-              <span className="stat-label">Duração</span>
-              <span className="stat-value">{formatDuration(elapsed)}</span>
-            </div>
           </div>
         </div>
+      );
+    }
+
+    // ─── Process Duration ───
+    function ProcessDuration({ proc }) {
+      const [now, setNow] = useState(Date.now());
+
+      useEffect(() => {
+        if (!proc.started_at || proc.ended_at) return;
+        const iv = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(iv);
+      }, [proc.started_at, proc.ended_at]);
+
+      if (!proc.started_at) return null;
+
+      const start = new Date(proc.started_at).getTime();
+      const end = proc.ended_at ? new Date(proc.ended_at).getTime() : now;
+      const elapsed = end - start;
+
+      return (
+        <span>{formatDuration(elapsed)}</span>
       );
     }
 
@@ -687,6 +702,7 @@
                 <div className="process-meta">
                   <span>{countAgents(proc)} agente{countAgents(proc) !== 1 ? 's' : ''}</span>
                   <span>{countTasks(proc)} tarefa{countTasks(proc) !== 1 ? 's' : ''}</span>
+                  {proc.started_at && <span><ProcessDuration proc={proc} /></span>}
                 </div>
               </div>
             ))}
@@ -701,11 +717,7 @@
         new Date(b.timestamp) - new Date(a.timestamp)
       )[0];
 
-      const step = latestTask?.step || 0;
-      const total = latestTask?.total_steps || 0;
-      const pct = total > 0 ? Math.round((step / total) * 100) : 0;
       const message = latestTask?.message || '';
-      const color = getProgressColor(agent.status);
 
       return (
         <div className={`agent-card status-${agent.status} animate-in`}>
@@ -716,14 +728,7 @@
             </span>
             <Badge status={agent.status} onCard />
           </div>
-          <div className="agent-message">{message || '—'}</div>
-          <div className="progress-bar-container">
-            <div className={`progress-bar-fill ${color}`} style={{width: `${pct}%`}}></div>
-          </div>
-          <div className="progress-label">
-            <span>{step}/{total} etapas</span>
-            <span>{pct}%</span>
-          </div>
+          <div className="agent-message">{message || '\u2014'}</div>
         </div>
       );
     }
@@ -791,37 +796,26 @@
                     <th>Tarefa</th>
                     <th>Status</th>
                     <th>Mensagem</th>
-                    <th>Progresso</th>
-                    <th>Timestamp</th>
+                    <th>Hora</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row, i) => {
-                    const pct = row.total_steps > 0 ? Math.round((row.step / row.total_steps) * 100) : 0;
-                    const color = getProgressColor(row.status);
-                    return (
-                      <tr key={`${row.agentName}-${row.taskName}`} className="animate-in" style={{animationDelay: `${i * 30}ms`}}>
-                        <td><span className="task-agent-name">{row.agentName}</span></td>
-                        <td>{row.taskName}</td>
-                        <td>
-                          <span className="task-status-cell">
-                            <span className="task-status-icon" role="img" aria-label={row.status}>{getStatusIcon(row.status)}</span>
-                            <span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span>
-                          </span>
-                        </td>
-                        <td>{row.message || '—'}</td>
-                        <td className="task-progress-cell">
-                          <div className="task-progress-bar">
-                            <div className={`task-progress-bar-fill progress-bar-fill ${color}`} style={{width: `${pct}%`}}></div>
-                          </div>
-                          <span className="task-progress-label">{row.step}/{row.total_steps} ({pct}%)</span>
-                        </td>
-                        <td style={{fontSize: '11px', color: 'var(--text-dark-muted)'}}>
-                          {row.timestamp ? new Date(row.timestamp).toLocaleTimeString('pt-BR') : '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {rows.map((row, i) => (
+                    <tr key={`${row.agentName}-${row.taskName}`} className="animate-in" style={{animationDelay: `${i * 30}ms`}}>
+                      <td><span className="task-agent-name">{row.agentName}</span></td>
+                      <td>{row.taskName}</td>
+                      <td>
+                        <span className="task-status-cell">
+                          <span className="task-status-icon" role="img" aria-label={row.status}>{getStatusIcon(row.status)}</span>
+                          <span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span>
+                        </span>
+                      </td>
+                      <td>{row.message || '\u2014'}</td>
+                      <td style={{fontSize: '11px', color: 'var(--text-dark-muted)'}}>
+                        {row.timestamp ? new Date(row.timestamp).toLocaleTimeString('pt-BR') : '\u2014'}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             )}
@@ -835,7 +829,6 @@
       const [state, setState] = useState({ processes: {}, hooks: [], session_id: null, event_count: 0 });
       const [selected, setSelected] = useState(null);
       const [connected, setConnected] = useState(false);
-      const [sessionStart] = useState(Date.now());
       const wsRef = useRef(null);
 
       const applyEvent = useCallback((evt) => {
@@ -845,9 +838,9 @@
           if (evt.session_id) next.session_id = evt.session_id;
 
           if (evt.type === 'process_start' && evt.process) {
-            next.processes[evt.process] = { ...next.processes[evt.process], status: 'active', agents: next.processes[evt.process]?.agents || {} };
+            next.processes[evt.process] = { ...next.processes[evt.process], status: 'active', started_at: evt.timestamp || new Date().toISOString(), ended_at: null, agents: next.processes[evt.process]?.agents || {} };
           } else if (evt.type === 'process_end' && evt.process && next.processes[evt.process]) {
-            next.processes[evt.process] = { ...next.processes[evt.process], status: 'completed' };
+            next.processes[evt.process] = { ...next.processes[evt.process], status: 'completed', ended_at: evt.timestamp || new Date().toISOString() };
           } else if (evt.type === 'progress' && evt.process) {
             if (!next.processes[evt.process]) {
               next.processes[evt.process] = { status: 'active', agents: {} };
@@ -928,7 +921,7 @@
 
       return (
         <div id="root" style={{height: '100vh', display: 'flex', flexDirection: 'column'}}>
-          <TopBar state={state} connected={connected} sessionStart={sessionStart} />
+          <TopBar state={state} connected={connected} />
           <div className="layout">
             <Sidebar processes={state.processes} selected={selected} onSelect={setSelected} />
             <div className="main">
