@@ -1,6 +1,9 @@
 # Symlinks locais — não versionar
 /CLAUDE.md
 
+# Git worktrees locais — isolamento de trabalho
+.worktrees/
+
 # Infraestrutura de desenvolvimento — não distribuir ao cliente
 .dev/
 
