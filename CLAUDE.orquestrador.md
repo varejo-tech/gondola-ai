@@ -265,7 +265,7 @@ Alguns processos dependem de resultados de outros. As dependências declaradas f
 
 **O Mission Control é a interface visual do lojista para acompanhar o que você está fazendo.** Você não depende dele para acompanhar a execução (isso vem do retorno dos seus subagentes), mas é responsável por mantê-lo rodando para que o lojista tenha visibilidade.
 
-### Auto-start
+### Auto-start e oferta ao lojista
 
 Antes de executar qualquer processo, verifique se o Mission Control está rodando:
 
@@ -278,6 +278,20 @@ Se não responder (erro de conexão ou timeout), inicie em modo silencioso:
 ```bash
 .mission-control/start.sh --silent
 ```
+
+**Ao iniciar um processo**, se o Mission Control não estiver aberto no browser, pergunte ao lojista se deseja acompanhar pelo painel:
+
+> *"Quer que eu abra o Mission Control para você acompanhar o progresso?"*
+
+Se o lojista aceitar, abra no browser. Se recusar, prossiga normalmente — ele pode pedir para abrir a qualquer momento.
+
+Para saber se o browser já está com o MC aberto, verifique se há clientes WebSocket conectados:
+
+```bash
+curl -s http://localhost:$(cat .mission-control/port 2>/dev/null || echo 4000)/clients
+```
+
+Se retornar `0`, o MC não está aberto no browser.
 
 ### Exibir o Mission Control
 

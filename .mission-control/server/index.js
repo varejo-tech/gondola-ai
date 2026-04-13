@@ -51,6 +51,15 @@ app.get('/state', (req, res) => {
   }
 });
 
+// GET /clients — number of connected WebSocket clients (used by Orchestrator to check if browser is open)
+app.get('/clients', (req, res) => {
+  let count = 0;
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) count++;
+  });
+  res.json(count);
+});
+
 // WebSocket connection
 wss.on('connection', (ws) => {
   console.log('Dashboard client connected');

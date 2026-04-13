@@ -406,11 +406,6 @@
       font-size: 13px;
       font-weight: 500;
       color: var(--text-dark-secondary);
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm);
-      padding: 8px 14px;
-      box-shadow: var(--card-shadow);
       white-space: nowrap;
     }
 
@@ -427,11 +422,6 @@
     .overall-progress {
       flex: 1;
       max-width: 480px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm);
-      padding: 10px 16px;
-      box-shadow: var(--card-shadow);
     }
 
     .overall-progress-header {
@@ -653,6 +643,19 @@
       return 'green';
     }
 
+    // ─── Agent Display Names ───
+    const AGENT_DISPLAY_NAMES = {
+      'analista-consolidacao': 'Analista de Cross-Selling',
+      'analista-oportunidades': 'Agente de Produtos Promoção',
+      'criativo-briefing': 'Analista de Marketing',
+      'criativo-geracao-publicacao': 'Agente Designer',
+      'execucao-distribuicao': 'Gestor de Promoção',
+    };
+
+    function getAgentDisplayName(name) {
+      return AGENT_DISPLAY_NAMES[name] || name;
+    }
+
     function getStatusIcon(status) {
       const icons = {
         completed: '\u2705',   // ✅
@@ -796,7 +799,7 @@
           <div className="agent-card-header card-badge">
             <span className="agent-name">
               <span className="agent-icon" role="img" aria-label="agente">{'\u{1F916}'}</span>
-              {name}
+              {getAgentDisplayName(name)}
             </span>
             <Badge status={agent.status} onCard />
           </div>
@@ -946,7 +949,7 @@
                   {new Date(entry.timestamp).toLocaleTimeString('pt-BR')}
                 </span>
                 <span className="log-status-icon">{getStatusIcon(entry.status)}</span>
-                <span className="log-agent">{entry.agent}</span>
+                <span className="log-agent">{getAgentDisplayName(entry.agent)}</span>
                 <span className="log-message">{entry.message}</span>
               </div>
             ))}

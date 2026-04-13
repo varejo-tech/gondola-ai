@@ -31,7 +31,17 @@ const insertStmt = db.prepare(`
   VALUES (@event_id, @timestamp, @session_id, @source, @type, @process, @agent, @task, @payload)
 `);
 
+const clearProcessEventsStmt = db.prepare(`
+  DELETE FROM events WHERE process = ?
+`);
+
 function insertEvent(event) {
+  // Ao iniciar um processo, limpa todos os eventos anteriores desse processo.
+  // Garante que o Mission Control abre limpo a cada nova execução.
+  if (event.type === 'process_start' && event.process) {
+    clearProcessEventsStmt.run(event.process);
+  }
+
   insertStmt.run({
     event_id: event.event_id,
     timestamp: event.timestamp,
