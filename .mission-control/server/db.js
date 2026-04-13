@@ -59,6 +59,7 @@ function getState() {
     hooks: [],
     session_id: null,
     event_count: events.length,
+    activityLog: {},
   };
 
   // Primeira passada: encontrar o timestamp do process_start mais recente por processo.
@@ -81,9 +82,14 @@ function getState() {
         state.processes[evt.process] = { status: 'active', agents: {} };
       }
       state.processes[evt.process].status = 'active';
+      state.processes[evt.process].started_at = evt.timestamp;
+      state.processes[evt.process].ended_at = null;
+      // Reset activity log on new process run
+      state.activityLog[evt.process] = [];
     } else if (evt.type === 'process_end' && evt.process) {
       if (state.processes[evt.process]) {
         state.processes[evt.process].status = 'completed';
+        state.processes[evt.process].ended_at = evt.timestamp;
       }
     } else if (evt.type === 'progress' && evt.process) {
       // Descarta eventos de progress anteriores ao último process_start deste processo.
@@ -110,6 +116,18 @@ function getState() {
             message: evt.payload.message || '',
             timestamp: evt.timestamp
           };
+        }
+
+        // Accumulate in activity log
+        if (evt.payload.message && evt.agent) {
+          if (!state.activityLog[evt.process]) state.activityLog[evt.process] = [];
+          state.activityLog[evt.process].push({
+            agent: evt.agent,
+            task: evt.task || '',
+            status: evt.payload.status || 'running',
+            message: evt.payload.message,
+            timestamp: evt.timestamp,
+          });
         }
       }
     } else if (evt.type === 'tool_start' || evt.type === 'tool_end' || evt.type === 'tool_error') {

@@ -388,8 +388,108 @@
       color: var(--text-dark-muted);
     }
 
-    /* ─── Task Table ─── */
-    .task-panel {
+    /* ─── Process Info Bar ─── */
+    .process-info-bar {
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .process-started-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dark-secondary);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      box-shadow: var(--card-shadow);
+      white-space: nowrap;
+    }
+
+    .process-started-label .started-icon {
+      font-size: 14px;
+    }
+
+    .process-started-label strong {
+      color: var(--text-dark);
+      font-weight: 600;
+    }
+
+    /* ─── Overall Progress Bar ─── */
+    .overall-progress {
+      flex: 1;
+      max-width: 480px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .overall-progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .overall-progress-label {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-dark-muted);
+    }
+
+    .overall-progress-pct {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .overall-progress-bar {
+      background: #f1f5f9;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .overall-progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.6s ease;
+      background: linear-gradient(90deg, #9bbf1e, var(--lime));
+    }
+
+    .overall-progress-bar-fill.completed {
+      background: linear-gradient(90deg, #16a34a, var(--green));
+    }
+
+    .overall-progress-bar-fill.has-error {
+      background: linear-gradient(90deg, #dc2626, var(--red));
+    }
+
+    .overall-progress-phases {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      color: var(--text-dark-muted);
+    }
+
+    /* ─── Activity Log ─── */
+    .activity-log-panel {
       flex: 1;
       overflow: hidden;
       display: flex;
@@ -397,84 +497,56 @@
       padding: 20px 28px 24px;
     }
 
-    .task-table-wrapper {
+    .activity-log-wrapper {
       flex: 1;
       overflow-y: auto;
       border: 1px solid var(--card-border);
       border-radius: var(--radius);
-      background: var(--card-bg);
+      background: #1e293b;
       box-shadow: var(--card-shadow);
+      padding: 14px 16px;
+      scroll-behavior: smooth;
     }
 
-    .task-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
+    .activity-log-entry {
+      display: flex;
+      gap: 10px;
+      padding: 5px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.6;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      animation: fade-in 0.2s ease forwards;
     }
 
-    .task-table thead {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    .task-table th {
-      background: #f8fafc;
-      padding: 12px 16px;
-      text-align: left;
-      font-family: var(--font-sans);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--text-dark-muted);
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .task-table td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f1f5f9;
-      color: var(--text-dark-secondary);
-      font-family: var(--font-sans);
-      font-size: 13px;
-    }
-
-    .task-table tr:last-child td {
+    .activity-log-entry:last-child {
       border-bottom: none;
     }
 
-    .task-table tr:hover td {
-      background: #f8fafc;
+    .log-time {
+      color: #64748b;
+      flex-shrink: 0;
+      font-size: 11px;
     }
 
-    .task-agent-name {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-dark);
-    }
-
-    .task-progress-cell {
-      width: 140px;
-    }
-
-    .task-progress-bar {
-      background: #f1f5f9;
-      border-radius: 3px;
-      height: 4px;
+    .log-agent {
+      color: var(--lime);
+      flex-shrink: 0;
+      font-weight: 600;
+      max-width: 180px;
       overflow: hidden;
-      margin-bottom: 4px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .task-progress-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.4s ease;
+    .log-message {
+      color: #cbd5e1;
+      word-break: break-word;
     }
 
-    .task-progress-label {
-      font-size: 10px;
-      color: var(--text-dark-muted);
+    .log-status-icon {
+      flex-shrink: 0;
+      font-size: 11px;
     }
 
     .status-text { font-weight: 600; font-size: 12px; }
@@ -766,59 +838,118 @@
       );
     }
 
-    // ─── Task Table ───
-    function TaskPanel({ process }) {
-      const rows = [];
-      if (process) {
-        for (const [agentName, agent] of Object.entries(process.agents || {})) {
-          for (const [taskName, task] of Object.entries(agent.tasks || {})) {
-            rows.push({ agentName, taskName, ...task });
+    // ─── Format start date ───
+    function formatStartDate(isoString) {
+      if (!isoString) return '';
+      const d = new Date(isoString);
+      const months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      const day = d.getDate();
+      const month = months[d.getMonth()];
+      const hours = String(d.getHours()).padStart(2, '0');
+      const mins = String(d.getMinutes()).padStart(2, '0');
+      return `${day} de ${month} às ${hours}:${mins}`;
+    }
+
+    // ─── Calculate overall progress ───
+    function calcOverallProgress(process) {
+      if (!process) return { pct: 0, done: 0, total: 0, hasError: false, allCompleted: false };
+      let totalSteps = 0;
+      let completedSteps = 0;
+      let hasError = false;
+      let taskCount = 0;
+      let completedTasks = 0;
+
+      for (const agent of Object.values(process.agents || {})) {
+        for (const task of Object.values(agent.tasks || {})) {
+          if (task.status === 'disabled') continue;
+          taskCount++;
+          if (task.total_steps > 0) {
+            totalSteps += task.total_steps;
+            completedSteps += task.step || 0;
           }
+          if (task.status === 'completed') completedTasks++;
+          if (task.status === 'error') hasError = true;
         }
       }
-      rows.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      const pct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+      return { pct, done: completedSteps, total: totalSteps, hasError, allCompleted: taskCount > 0 && completedTasks === taskCount };
+    }
+
+    // ─── Process Info Bar ───
+    function ProcessInfoBar({ process, processName }) {
+      if (!process) return null;
+
+      const progress = calcOverallProgress(process);
+      const barClass = progress.allCompleted ? 'completed' : (progress.hasError ? 'has-error' : '');
 
       return (
-        <div className="task-panel">
-          <div className="panel-header">Tarefas</div>
-          <div className="task-table-wrapper">
-            {rows.length === 0 ? (
-              <div className="empty-state" style={{height: '200px'}}>
-                <div className="empty-state-icon">&#9671;</div>
-                <div className="empty-state-text">Nenhuma tarefa registrada</div>
-                <div className="empty-state-hint">As tarefas aparecerão aqui conforme os agentes reportarem progresso</div>
+        <div className="process-info-bar">
+          {process.started_at && (
+            <div className="process-started-label">
+              <span className="started-icon" role="img" aria-label="clock">{'\u{1F552}'}</span>
+              Processo iniciado em <strong>{formatStartDate(process.started_at)}</strong>
+            </div>
+          )}
+          {progress.total > 0 && (
+            <div className="overall-progress">
+              <div className="overall-progress-header">
+                <span className="overall-progress-label">Progresso geral</span>
+                <span className="overall-progress-pct">{progress.pct}%</span>
               </div>
-            ) : (
-              <table className="task-table">
-                <thead>
-                  <tr>
-                    <th>Agente</th>
-                    <th>Tarefa</th>
-                    <th>Status</th>
-                    <th>Mensagem</th>
-                    <th>Hora</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row, i) => (
-                    <tr key={`${row.agentName}-${row.taskName}`} className="animate-in" style={{animationDelay: `${i * 30}ms`}}>
-                      <td><span className="task-agent-name">{row.agentName}</span></td>
-                      <td>{row.taskName}</td>
-                      <td>
-                        <span className="task-status-cell">
-                          <span className="task-status-icon" role="img" aria-label={row.status}>{getStatusIcon(row.status)}</span>
-                          <span className={`status-text ${row.status}`}>{getStatusLabel(row.status)}</span>
-                        </span>
-                      </td>
-                      <td>{row.message || '\u2014'}</td>
-                      <td style={{fontSize: '11px', color: 'var(--text-dark-muted)'}}>
-                        {row.timestamp ? new Date(row.timestamp).toLocaleTimeString('pt-BR') : '\u2014'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+              <div className="overall-progress-bar">
+                <div className={`overall-progress-bar-fill ${barClass}`} style={{width: `${progress.pct}%`}}></div>
+              </div>
+              <div className="overall-progress-phases">
+                <span>{progress.done} de {progress.total} etapas</span>
+                {progress.allCompleted && <span>{'\u2705'} Concluído</span>}
+                {progress.hasError && <span>{'\u274C'} Com erros</span>}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ─── Activity Log ───
+    function ActivityLog({ entries }) {
+      const logRef = useRef(null);
+      const wasAtBottomRef = useRef(true);
+
+      // Auto-scroll to bottom when new entries arrive
+      useEffect(() => {
+        const el = logRef.current;
+        if (el && wasAtBottomRef.current) {
+          el.scrollTop = el.scrollHeight;
+        }
+      }, [entries.length]);
+
+      const handleScroll = () => {
+        const el = logRef.current;
+        if (el) {
+          wasAtBottomRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 20;
+        }
+      };
+
+      return (
+        <div className="activity-log-panel">
+          <div className="panel-header">Log de Atividade</div>
+          <div className="activity-log-wrapper" ref={logRef} onScroll={handleScroll}>
+            {entries.length === 0 ? (
+              <div className="empty-state" style={{height: '160px'}}>
+                <div className="empty-state-icon" style={{opacity: 0.3}}>&#9671;</div>
+                <div className="empty-state-text" style={{color: '#64748b'}}>Aguardando mensagens dos agentes...</div>
+              </div>
+            ) : entries.map((entry, i) => (
+              <div key={`${entry.agent}-${entry.task}-${i}`} className="activity-log-entry">
+                <span className="log-time">
+                  {new Date(entry.timestamp).toLocaleTimeString('pt-BR')}
+                </span>
+                <span className="log-status-icon">{getStatusIcon(entry.status)}</span>
+                <span className="log-agent">{entry.agent}</span>
+                <span className="log-message">{entry.message}</span>
+              </div>
+            ))}
           </div>
         </div>
       );
@@ -826,7 +957,7 @@
 
     // ─── App ───
     function App() {
-      const [state, setState] = useState({ processes: {}, hooks: [], session_id: null, event_count: 0 });
+      const [state, setState] = useState({ processes: {}, hooks: [], session_id: null, event_count: 0, activityLog: {} });
       const [selected, setSelected] = useState(null);
       const [connected, setConnected] = useState(false);
       const wsRef = useRef(null);
@@ -835,10 +966,13 @@
         setState(prev => {
           const next = { ...prev, event_count: (prev.event_count || 0) + 1 };
           next.processes = { ...prev.processes };
+          next.activityLog = { ...prev.activityLog };
           if (evt.session_id) next.session_id = evt.session_id;
 
           if (evt.type === 'process_start' && evt.process) {
             next.processes[evt.process] = { ...next.processes[evt.process], status: 'active', started_at: evt.timestamp || new Date().toISOString(), ended_at: null, agents: next.processes[evt.process]?.agents || {} };
+            // Reset activity log on new process run
+            next.activityLog[evt.process] = [];
           } else if (evt.type === 'process_end' && evt.process && next.processes[evt.process]) {
             next.processes[evt.process] = { ...next.processes[evt.process], status: 'completed', ended_at: evt.timestamp || new Date().toISOString() };
           } else if (evt.type === 'progress' && evt.process) {
@@ -869,6 +1003,18 @@
                   message: evt.payload?.message || '',
                   timestamp: evt.timestamp
                 };
+              }
+
+              // Accumulate in activity log
+              if (evt.payload?.message) {
+                if (!next.activityLog[evt.process]) next.activityLog[evt.process] = [];
+                next.activityLog[evt.process] = [...next.activityLog[evt.process], {
+                  agent: evt.agent,
+                  task: evt.task || '',
+                  status: evt.payload?.status || 'running',
+                  message: evt.payload.message,
+                  timestamp: evt.timestamp || new Date().toISOString(),
+                }];
               }
             }
           } else if (evt.type === 'tool_start' || evt.type === 'tool_end' || evt.type === 'tool_error') {
@@ -925,8 +1071,9 @@
           <div className="layout">
             <Sidebar processes={state.processes} selected={selected} onSelect={setSelected} />
             <div className="main">
+              <ProcessInfoBar process={selectedProcess} processName={selected} />
               <AgentPanel process={selectedProcess} />
-              <TaskPanel process={selectedProcess} />
+              <ActivityLog entries={selected ? (state.activityLog[selected] || []) : []} />
             </div>
           </div>
         </div>
