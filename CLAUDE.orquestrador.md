@@ -133,8 +133,9 @@ Quando o lojista invoca um processo (ex.: `/promocao`), o slash command do plugi
 3. **Dependências** — Aplique o protocolo de *"Dependências entre processos"*. As dependências declaradas ficam em `gondola.json > dependencias`.
 4. **Marcar início no Mission Control** — Execute `./start-process.sh {nome-do-processo}` imediatamente antes de despachar o primeiro subagente. Isso emite um marcador de nova execução que zera o estado visual no dashboard. Obrigatório em toda execução.
 5. **Despacho dos subagentes** — Para cada subagente declarado no `processo.md`, na ordem descrita: despache via ferramenta `Task` com `background: true`, usando o identificador qualificado `{nome-do-plugin}:{nome-do-subagente}`. Siga o protocolo detalhado na seção *"Como despachar subagentes de plugin"* mais adiante. Os outputs gerados por um subagente ficam em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/` e são lidos pelo próximo subagente quando necessário.
-6. **Checkpoints** — Os subagentes sinalizam checkpoints retornando `status: "waiting-user-input"` com uma pergunta específica ao lojista. Ao receber isso, pause o fluxo, retraduza a pergunta no seu tom de voz, aguarde a resposta, interprete, e inclua a orientação resultante no input do próximo despacho.
-7. **Encerramento** — Ao concluir o último subagente com sucesso, consolide o resultado e reporte ao lojista o que foi entregue, onde estão os outputs (em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/`), e o que (se algo) requer atenção dele.
+6. **Reportar progresso ao Mission Control** — A cada despacho e retorno de subagente, você DEVE atualizar o Mission Control. Siga o protocolo detalhado na seção *"Reportar progresso ao Mission Control"* mais adiante. Sem isso, o dashboard fica em branco.
+7. **Checkpoints** — Os subagentes sinalizam checkpoints retornando `status: "waiting-user-input"` com uma pergunta específica ao lojista. Ao receber isso, pause o fluxo, retraduza a pergunta no seu tom de voz, aguarde a resposta, interprete, e inclua a orientação resultante no input do próximo despacho.
+8. **Encerramento** — Ao concluir o último subagente com sucesso, consolide o resultado e reporte ao lojista o que foi entregue, onde estão os outputs (em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/`), e o que (se algo) requer atenção dele.
 
 ### Como você acompanha a execução
 
@@ -191,6 +192,56 @@ Dados pesados são sempre lidos do filesystem pelo próprio subagente. Nunca car
 **Nomenclatura dos subagentes**: sempre use o identificador qualificado `{nome-do-plugin}:{nome-do-subagente}` ao invocar via `Task`. Exemplo: `promocao:analista-oportunidades`. O Claude Code resolve o subagente dentro do plugin instalado.
 
 **Contexto isolado**: cada invocação de subagente recebe contexto fresco. Nada do que um subagente "sabia" sobrevive para o próximo. A única ponte entre subagentes de um mesmo processo é o filesystem (outputs em `${CLAUDE_PLUGIN_DATA}/{processo}/outputs/`). Isso é por design.
+
+### Reportar progresso ao Mission Control
+
+> **Isso é obrigatório.** Sem esses eventos, o dashboard do Mission Control fica em branco. Você é a única fonte de eventos de progresso — os subagentes não reportam diretamente.
+
+Use o script `report-progress.sh` na raiz do projeto para emitir eventos ao MC. A interface é:
+
+```bash
+./report-progress.sh <processo> <agente> <tarefa> <status> <step> <total> "<mensagem>"
+```
+
+**Quando reportar:**
+
+| Momento | status | step | mensagem |
+|---|---|---|---|
+| Ao despachar um subagente | `started` | 1 | Descrição curta do que o agente vai fazer |
+| Ao receber retorno com `status: "done"` | `completed` | (step final) | Resumo curto do resultado |
+| Ao receber retorno com `status: "error"` | `error` | (step atual) | Descrição curta do erro |
+| Ao receber retorno com `status: "waiting-user-input"` | `waiting` | (step atual) | Aguardando decisão do lojista |
+
+**Parâmetros:**
+
+- `<processo>`: nome do processo (ex: `promocao`)
+- `<agente>`: nome do subagente como declarado no plugin (ex: `analista-oportunidades`)
+- `<tarefa>`: nome curto da tarefa/fase (ex: `analise-produtos`, `pesquisa-concorrentes`)
+- `<step>` e `<total>`: posição dentro do fluxo total de subagentes do processo. Se o processo tem 5 subagentes e você está despachando o 2o, use step=2 total=5. Ao receber retorno com sucesso desse mesmo subagente, reporte step=2 total=5 com status `completed`.
+
+**Exemplo prático** para um processo com 3 subagentes:
+
+```bash
+# Despachando o 1o subagente
+./report-progress.sh promocao analista-oportunidades analise-produtos started 1 3 "Analisando produtos com potencial promocional"
+
+# 1o subagente retornou com sucesso
+./report-progress.sh promocao analista-oportunidades analise-produtos completed 1 3 "8 produtos identificados para promoção"
+
+# Despachando o 2o subagente
+./report-progress.sh promocao analista-consolidacao cross-selling started 2 3 "Consolidando cross-selling e pesquisa de concorrentes"
+
+# 2o subagente retornou com sucesso
+./report-progress.sh promocao analista-consolidacao cross-selling completed 2 3 "Cross-selling e concorrentes consolidados"
+
+# Despachando o 3o subagente
+./report-progress.sh promocao criativo-briefing briefing-criativo started 3 3 "Gerando briefing e peças criativas"
+
+# 3o subagente retornou com sucesso
+./report-progress.sh promocao criativo-briefing briefing-criativo completed 3 3 "Briefing e peças criativas finalizados"
+```
+
+**Regra:** nunca pule o reporte. Cada despacho e cada retorno geram exatamente uma chamada a `report-progress.sh`.
 
 ### Interrupção e redirecionamento pelo lojista
 

@@ -20,27 +20,5 @@
     ],
     "deny": []
   },
-  "hooks": {
-    "PreToolUse": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "cd \"$(git rev-parse --show-toplevel)\" && node .mission-control/server/send_event.js --event-type PreToolUse"
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "cd \"$(git rev-parse --show-toplevel)\" && node .mission-control/server/send_event.js --event-type PostToolUse"
-      }]
-    }],
-    "Stop": [{
-      "matcher": ".*",
-      "hooks": [{
-        "type": "command",
-        "command": "cd \"$(git rev-parse --show-toplevel)\" && node .mission-control/server/send_event.js --event-type Stop"
-      }]
-    }]
-  }
+  "hooks": {}
 }
