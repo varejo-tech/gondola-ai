@@ -1,6 +1,5 @@
 # Arquivos locais — gerados pelo bootstrap, não versionar
 memory.op.md
-.claude/settings.json
 .claude/settings.local.json
 .claude/memory.md
 
